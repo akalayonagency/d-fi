@@ -3,722 +3,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PhoneXpress — Carousel iPhones</title>
-
+  <title>PhoneXpress Carousel</title>
   <style>
     :root {
-      --px-text: #ffffff;
-      --px-muted: rgba(255,255,255,.68);
-      --px-glass: rgba(255,255,255,.11);
-      --px-border: rgba(255,255,255,.16);
-      --px-accent: #6ee7ff;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.7);
+      --accent: #6ee7ff;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: transparent;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    .phonexpress-carousel {
-      width: 100%;
-      min-height: 620px;
-      position: relative;
+      font-family: Inter, system-ui, sans-serif;
       overflow: hidden;
-      background: transparent;
-      color: var(--px-text);
-      touch-action: pan-y;
-      user-select: none;
-      isolation: isolate;
     }
 
-    .px-stage {
+    .stage {
       width: 100%;
-      height: 500px;
+      height: 600px;
       position: relative;
       perspective: 1200px;
-      cursor: grab;
     }
 
-    .px-stage:active {
-      cursor: grabbing;
-    }
-
-    .px-phone-card {
+    .phone-card {
       position: absolute;
       left: 50%;
-      top: 46%;
-      width: clamp(150px, 18vw, 225px);
-      height: clamp(305px, 36vw, 455px);
+      top: 45%;
+      width: 220px;
+      height: 440px;
       transform-style: preserve-3d;
-      transition:
-        transform .82s cubic-bezier(.22,1,.36,1),
-        opacity .82s cubic-bezier(.22,1,.36,1),
-        filter .82s cubic-bezier(.22,1,.36,1);
+      transition: all .8s cubic-bezier(.22,1,.36,1);
       opacity: 0;
-      filter: blur(7px);
-      will-change: transform, opacity, filter;
+      filter: blur(6px);
     }
 
-    .px-phone-card.is-dragging {
-      transition-duration: .08s;
-    }
-
-    .px-phone-card[data-position="0"] {
-      transform: translate(-50%, -50%) translateX(var(--drag-offset, 0px)) translateZ(155px) scale(1.08);
+    .phone-card[data-position="0"] {
+      transform: translate(-50%, -50%) translateZ(150px) scale(1.1);
       opacity: 1;
-      filter: blur(0);
+      filter: none;
       z-index: 10;
     }
 
-    .px-phone-card[data-position="-1"] {
-      transform: translate(-50%, -50%) translateX(calc(-265px + var(--drag-offset, 0px))) translateZ(20px) rotateY(-12deg) scale(.84);
-      opacity: .72;
-      filter: blur(1.5px);
-      z-index: 7;
+    .phone-card[data-position="-1"] {
+      transform: translate(-50%, -50%) translateX(-260px) scale(.85) rotateY(-10deg);
+      opacity: .7;
     }
 
-    .px-phone-card[data-position="1"] {
-      transform: translate(-50%, -50%) translateX(calc(265px + var(--drag-offset, 0px))) translateZ(20px) rotateY(12deg) scale(.84);
-      opacity: .72;
-      filter: blur(1.5px);
-      z-index: 7;
+    .phone-card[data-position="1"] {
+      transform: translate(-50%, -50%) translateX(260px) scale(.85) rotateY(10deg);
+      opacity: .7;
     }
 
-    .px-phone-card[data-position="-2"] {
-      transform: translate(-50%, -50%) translateX(calc(-485px + var(--drag-offset, 0px))) translateZ(-150px) rotateY(-18deg) scale(.63);
-      opacity: .32;
-      filter: blur(4px);
-      z-index: 4;
+    .phone-card[data-position="-2"] {
+      transform: translate(-50%, -50%) translateX(-480px) scale(.65);
+      opacity: .3;
     }
 
-    .px-phone-card[data-position="2"] {
-      transform: translate(-50%, -50%) translateX(calc(485px + var(--drag-offset, 0px))) translateZ(-150px) rotateY(18deg) scale(.63);
-      opacity: .32;
-      filter: blur(4px);
-      z-index: 4;
+    .phone-card[data-position="2"] {
+      transform: translate(-50%, -50%) translateX(480px) scale(.65);
+      opacity: .3;
     }
 
-    .px-phone-card[data-position="hidden"] {
-      transform: translate(-50%, -50%) translateX(var(--drag-offset, 0px)) translateZ(-300px) scale(.45);
-      opacity: 0;
-      filter: blur(8px);
-      z-index: 1;
-    }
-
-    .px-phone {
-      position: relative;
+    .phone {
       width: 100%;
       height: 100%;
-      border-radius: clamp(30px, 3.5vw, 44px);
+      border-radius: 40px;
       background: var(--phone-body);
-      box-shadow:
-        inset 0 0 0 2px rgba(255,255,255,.16),
-        inset 0 0 30px rgba(255,255,255,.08),
-        0 35px 80px rgba(0,0,0,.42);
-      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4);
+      position: relative;
     }
 
-    .px-phone::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,.30), transparent 24%, transparent 68%, rgba(255,255,255,.14)),
-        radial-gradient(circle at 28% 0%, rgba(255,255,255,.22), transparent 34%);
-      opacity: .72;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .px-phone::after {
-      content: "";
-      position: absolute;
-      inset: 9px;
-      border-radius: clamp(24px, 3vw, 36px);
-      border: 1px solid rgba(255,255,255,.12);
-      pointer-events: none;
-    }
-
-    .px-camera {
+    .camera-block {
       position: absolute;
       top: 15px;
       left: 15px;
-      width: clamp(72px, 8vw, 104px);
-      height: clamp(72px, 8vw, 104px);
-      border-radius: clamp(22px, 2.3vw, 30px);
-      background: rgba(0,0,0,.15);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), 0 15px 28px rgba(0,0,0,.22);
-      backdrop-filter: blur(12px);
+      width: 90px;
+      height: 90px;
+      border-radius: 25px;
+      background: rgba(0,0,0,.2);
     }
 
-    .px-lens {
+    .lens {
       position: absolute;
-      width: clamp(25px, 3vw, 38px);
-      height: clamp(25px, 3vw, 38px);
-      border-radius: 999px;
-      background: radial-gradient(circle at 34% 34%, #182547 0 12%, #05070d 38%, #17191d 58%, #020204 76%);
-      box-shadow: inset 0 0 0 3px rgba(255,255,255,.15), 0 7px 14px rgba(0,0,0,.35);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #111;
     }
 
-    .px-lens.one { left: 10%; top: 10%; }
-    .px-lens.two { right: 10%; top: 35%; }
-    .px-lens.three { left: 19%; bottom: 10%; }
+    .lens.one { top: 10px; left: 10px; }
+    .lens.two { bottom: 10px; right: 10px; }
 
-    .px-flash {
+    .info {
       position: absolute;
-      right: 15%;
-      top: 12%;
-      width: clamp(15px, 1.8vw, 22px);
-      height: clamp(15px, 1.8vw, 22px);
-      border-radius: 999px;
-      background: radial-gradient(circle, #fff4cb, #cfc7ba 62%, #77736d);
-      opacity: .92;
-    }
-
-    .px-phone.simple .px-lens.three {
-      display: none;
-    }
-
-    .px-phone.simple .px-lens.one {
-      left: 13%;
-      top: 13%;
-    }
-
-    .px-phone.simple .px-lens.two {
-      right: 13%;
-      bottom: 13%;
-      top: auto;
-    }
-
-    .px-logo {
-      position: absolute;
+      bottom: 40px;
       left: 50%;
-      top: 51%;
-      width: 54px;
-      height: 54px;
-      transform: translate(-50%, -50%);
-      border-radius: 18px 18px 22px 22px;
-      background: rgba(0,0,0,.22);
-      opacity: .38;
-      filter: blur(.1px);
-    }
-
-    .px-logo::before {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 18px;
-      right: 9px;
-      top: -10px;
-      border-radius: 100% 0 100% 0;
-      background: rgba(0,0,0,.24);
-      transform: rotate(25deg);
-    }
-
-    .px-info {
-      width: min(620px, calc(100% - 32px));
-      position: absolute;
-      left: 50%;
-      bottom: 18px;
       transform: translateX(-50%);
       text-align: center;
-      z-index: 30;
-      pointer-events: none;
+      max-width: 500px;
     }
 
-    .px-kicker {
-      color: var(--px-accent);
-      font-size: 11px;
+    .title {
+      font-size: 42px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .22em;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
-    .px-title {
-      font-size: clamp(34px, 6vw, 64px);
-      line-height: .95;
-      letter-spacing: -.065em;
-      font-weight: 900;
-      margin-bottom: 9px;
-      text-shadow: 0 18px 45px rgba(0,0,0,.42);
-    }
-
-    .px-subtitle {
-      color: rgba(255,255,255,.9);
-      font-size: clamp(15px, 2vw, 20px);
-      font-weight: 650;
+    .subtitle {
+      font-size: 18px;
+      color: var(--muted);
       margin-bottom: 12px;
     }
 
-    .px-chips {
+    .chips {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
-      gap: 7px;
-      pointer-events: auto;
-    }
-
-    .px-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 11px;
-      border-radius: 999px;
-      background: var(--px-glass);
-      border: 1px solid var(--px-border);
-      color: rgba(255,255,255,.86);
-      font-size: 12px;
-      line-height: 1;
-      backdrop-filter: blur(18px);
-    }
-
-    .px-chip strong {
-      color: white;
-      font-weight: 850;
-    }
-
-    .px-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #7cf7b4;
-      box-shadow: 0 0 14px currentColor;
-    }
-
-    .px-dot.warning {
-      background: #ffd166;
-    }
-
-    .px-arrow {
-      position: absolute;
-      top: 43%;
-      z-index: 35;
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.25);
-      background: rgba(255,255,255,.08);
-      color: white;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      backdrop-filter: blur(18px);
-      transition: .25s ease;
-    }
-
-    .px-arrow:hover {
-      background: rgba(255,255,255,.16);
-      transform: scale(1.04);
-    }
-
-    .px-arrow svg {
-      width: 25px;
-      height: 25px;
-      stroke-width: 2.4;
-    }
-
-    .px-prev { left: max(12px, 3vw); }
-    .px-next { right: max(12px, 3vw); }
-
-    .px-dots {
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 8px;
-      z-index: 32;
+      gap: 6px;
     }
 
-    .px-dot-btn {
-      width: 7px;
-      height: 7px;
-      border: 0;
+    .chip {
+      font-size: 12px;
+      padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(255,255,255,.32);
+      background: rgba(255,255,255,.1);
+    }
+
+    .arrow {
+      position: absolute;
+      top: 45%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.1);
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
       cursor: pointer;
-      transition: .25s ease;
+      color: white;
     }
 
-    .px-dot-btn.active {
-      width: 24px;
-      background: var(--px-accent);
-      box-shadow: 0 0 16px var(--px-accent);
-    }
-
-    @media (max-width: 900px) {
-      .phonexpress-carousel {
-        min-height: 590px;
-      }
-
-      .px-stage {
-        height: 455px;
-      }
-
-      .px-phone-card[data-position="-1"] {
-        transform: translate(-50%, -50%) translateX(calc(-180px + var(--drag-offset, 0px))) translateZ(10px) rotateY(-12deg) scale(.77);
-      }
-
-      .px-phone-card[data-position="1"] {
-        transform: translate(-50%, -50%) translateX(calc(180px + var(--drag-offset, 0px))) translateZ(10px) rotateY(12deg) scale(.77);
-      }
-
-      .px-phone-card[data-position="-2"],
-      .px-phone-card[data-position="2"] {
-        opacity: 0;
-      }
-
-      .px-arrow {
-        display: none;
-      }
-
-      .px-info {
-        bottom: 20px;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .phonexpress-carousel {
-        min-height: 555px;
-      }
-
-      .px-stage {
-        height: 405px;
-      }
-
-      .px-phone-card {
-        top: 44%;
-        width: 152px;
-        height: 310px;
-      }
-
-      .px-phone-card[data-position="0"] {
-        transform: translate(-50%, -50%) translateX(var(--drag-offset, 0px)) translateZ(130px) scale(1.06);
-      }
-
-      .px-phone-card[data-position="-1"] {
-        transform: translate(-50%, -50%) translateX(calc(-130px + var(--drag-offset, 0px))) translateZ(0) rotateY(-13deg) scale(.72);
-        opacity: .55;
-      }
-
-      .px-phone-card[data-position="1"] {
-        transform: translate(-50%, -50%) translateX(calc(130px + var(--drag-offset, 0px))) translateZ(0) rotateY(13deg) scale(.72);
-        opacity: .55;
-      }
-
-      .px-chips {
-        gap: 6px;
-      }
-
-      .px-chip {
-        padding: 7px 9px;
-        font-size: 11px;
-      }
-    }
+    .prev { left: 10px; }
+    .next { right: 10px; }
   </style>
 </head>
 <body>
 
-  <section class="phonexpress-carousel" id="phonexpressCarousel" aria-label="Modèles iPhone actuellement en vente PhoneXpress">
-    <button class="px-arrow px-prev" type="button" aria-label="Modèle précédent">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6" /></svg>
-    </button>
+<div class="stage" id="stage"></div>
 
-    <div class="px-stage" id="pxStage"></div>
+<button class="arrow prev" onclick="prev()">‹</button>
+<button class="arrow next" onclick="next()">›</button>
 
-    <button class="px-arrow px-next" type="button" aria-label="Modèle suivant">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" /></svg>
-    </button>
+<div class="info">
+  <div class="title" id="title"></div>
+  <div class="subtitle" id="subtitle"></div>
+  <div class="chips" id="chips"></div>
+</div>
 
-    <article class="px-info" aria-live="polite">
-      <div class="px-kicker" id="pxKicker"></div>
-      <h2 class="px-title" id="pxTitle"></h2>
-      <p class="px-subtitle" id="pxSubtitle"></p>
-      <div class="px-chips" id="pxChips"></div>
-    </article>
+<script>
+const products = [
+  { name:"iPhone 15 Pro", storage:"256 Go", condition:"Excellent", battery:"92%", repaired:"Aucune", body:"linear-gradient(#aaa,#555)" },
+  { name:"iPhone 14 Pro", storage:"128 Go", condition:"Très bon", battery:"89%", repaired:"Écran changé", body:"linear-gradient(#6b5,#224)" },
+  { name:"iPhone 14", storage:"128 Go", condition:"Excellent", battery:"94%", repaired:"Aucune", body:"linear-gradient(#59c,#234)" },
+  { name:"iPhone 13", storage:"256 Go", condition:"Bon", battery:"86%", repaired:"Batterie changée", body:"linear-gradient(#333,#000)" },
+  { name:"iPhone SE", storage:"64 Go", condition:"Très bon", battery:"91%", repaired:"Aucune", body:"linear-gradient(#eee,#aaa)" }
+];
 
-    <div class="px-dots" id="pxDots" aria-label="Navigation carousel"></div>
-  </section>
+const stage = document.getElementById("stage");
+let active = 0;
 
-  <script>
-    const pxProducts = [
-      {
-        name: "iPhone 15 Pro",
-        year: "2023",
-        storage: "256 Go",
-        color: "Titane naturel",
-        condition: "Excellent état",
-        battery: "92%",
-        repaired: "Aucune réparation",
-        warranty: "6 mois",
-        price: "699€",
-        accent: "#c9b8a4",
-        body: "linear-gradient(145deg, #d1c5b8 0%, #877d71 52%, #393631 100%)",
-        pro: true
-      },
-      {
-        name: "iPhone 14 Pro",
-        year: "2022",
-        storage: "128 Go",
-        color: "Violet intense",
-        condition: "Très bon état",
-        battery: "89%",
-        repaired: "Écran remplacé",
-        warranty: "6 mois",
-        price: "579€",
-        accent: "#8b5cf6",
-        body: "linear-gradient(145deg, #766986 0%, #453856 54%, #17131f 100%)",
-        pro: true
-      },
-      {
-        name: "iPhone 14",
-        year: "2022",
-        storage: "128 Go",
-        color: "Bleu",
-        condition: "Excellent état",
-        battery: "94%",
-        repaired: "Aucune réparation",
-        warranty: "6 mois",
-        price: "449€",
-        accent: "#93c5fd",
-        body: "linear-gradient(145deg, #c2dbf3 0%, #7fa7c7 52%, #33495f 100%)",
-        pro: false
-      },
-      {
-        name: "iPhone 13",
-        year: "2021",
-        storage: "256 Go",
-        color: "Minuit",
-        condition: "Bon état",
-        battery: "86%",
-        repaired: "Batterie remplacée",
-        warranty: "3 mois",
-        price: "369€",
-        accent: "#64748b",
-        body: "linear-gradient(145deg, #343942 0%, #171b22 54%, #07080b 100%)",
-        pro: false
-      },
-      {
-        name: "iPhone SE 2022",
-        year: "2022",
-        storage: "64 Go",
-        color: "Lumière stellaire",
-        condition: "Très bon état",
-        battery: "91%",
-        repaired: "Aucune réparation",
-        warranty: "3 mois",
-        price: "229€",
-        accent: "#f8fafc",
-        body: "linear-gradient(145deg, #f2f0e9 0%, #b9b6ae 52%, #6d6c68 100%)",
-        pro: false
-      }
-    ];
-
-    const pxCarousel = document.getElementById("phonexpressCarousel");
-    const pxStage = document.getElementById("pxStage");
-    const pxDots = document.getElementById("pxDots");
-    const pxTitle = document.getElementById("pxTitle");
-    const pxSubtitle = document.getElementById("pxSubtitle");
-    const pxKicker = document.getElementById("pxKicker");
-    const pxChips = document.getElementById("pxChips");
-
-    let pxActive = 0;
-    let pxStartX = 0;
-    let pxCurrentX = 0;
-    let pxLastX = 0;
-    let pxLastTime = 0;
-    let pxVelocity = 0;
-    let pxDragging = false;
-    let pxAutoplay = null;
-
-    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-    function pxDistance(index, active) {
-      const total = pxProducts.length;
-      let diff = index - active;
-      if (diff > total / 2) diff -= total;
-      if (diff < -total / 2) diff += total;
-      return diff;
-    }
-
-    function pxBuild() {
-      pxStage.innerHTML = pxProducts.map((product, index) => `
-        <div class="px-phone-card" data-index="${index}" style="--phone-body:${product.body}; --phone-accent:${product.accent};">
-          <div class="px-phone ${product.pro ? "pro" : "simple"}">
-            <div class="px-camera">
-              <span class="px-lens one"></span>
-              <span class="px-lens two"></span>
-              <span class="px-lens three"></span>
-              <span class="px-flash"></span>
-            </div>
-            <span class="px-logo"></span>
-          </div>
+function build(){
+  stage.innerHTML = products.map((p,i)=>`
+    <div class="phone-card" data-index="${i}" style="--phone-body:${p.body}">
+      <div class="phone">
+        <div class="camera-block">
+          <div class="lens one"></div>
+          <div class="lens two"></div>
         </div>
-      `).join("");
+      </div>
+    </div>
+  `).join("");
+}
 
-      pxDots.innerHTML = pxProducts.map((product, index) => `
-        <button class="px-dot-btn" type="button" aria-label="Voir ${product.name}" data-index="${index}"></button>
-      `).join("");
+function update(){
+  document.querySelectorAll(".phone-card").forEach(card=>{
+    const i = +card.dataset.index;
+    let d = i - active;
+    if(d>2) d-=5;
+    if(d<-2) d+=5;
+    card.dataset.position = Math.abs(d)>2?"hidden":d;
+  });
 
-      pxDots.querySelectorAll(".px-dot-btn").forEach(button => {
-        button.addEventListener("click", () => {
-          pxActive = Number(button.dataset.index);
-          pxSetDragOffset(0);
-          pxUpdate();
-          pxRestartAutoplay();
-        });
-      });
-    }
+  const p = products[active];
+  title.textContent = p.name;
+  subtitle.textContent = `${p.storage} · ${p.condition}`;
+  chips.innerHTML = `
+    <div class="chip">Batterie ${p.battery}</div>
+    <div class="chip">${p.repaired}</div>
+  `;
+}
 
-    function pxSetDragOffset(value) {
-      const limited = clamp(value, -115, 115);
-      pxCarousel.style.setProperty("--drag-offset", `${limited}px`);
-    }
+function next(){ active=(active+1)%5; update(); }
+function prev(){ active=(active-1+5)%5; update(); }
 
-    function pxUpdate() {
-      const product = pxProducts[pxActive];
-      document.documentElement.style.setProperty("--px-accent", product.accent);
+build();
+update();
+</script>
 
-      pxStage.querySelectorAll(".px-phone-card").forEach(card => {
-        const distance = pxDistance(Number(card.dataset.index), pxActive);
-        card.dataset.position = Math.abs(distance) > 2 ? "hidden" : String(distance);
-        card.classList.toggle("is-dragging", pxDragging);
-      });
-
-      pxDots.querySelectorAll(".px-dot-btn").forEach(button => {
-        button.classList.toggle("active", Number(button.dataset.index) === pxActive);
-      });
-
-      pxKicker.textContent = product.repaired.includes("Aucune") ? "Disponible · origine contrôlée" : "Disponible · réparation signalée";
-      pxTitle.textContent = product.name;
-      pxSubtitle.textContent = `${product.color} · ${product.storage} · ${product.price}`;
-
-      const repairClass = product.repaired.includes("Aucune") ? "" : "warning";
-      pxChips.innerHTML = `
-        <span class="px-chip"><strong>${product.condition}</strong></span>
-        <span class="px-chip"><span class="px-dot"></span><strong>${product.battery}</strong> batterie</span>
-        <span class="px-chip"><strong>${product.year}</strong></span>
-        <span class="px-chip"><span class="px-dot ${repairClass}"></span>${product.repaired}</span>
-        <span class="px-chip">Garantie <strong>${product.warranty}</strong></span>
-      `;
-    }
-
-    function pxNext() {
-      pxActive = (pxActive + 1) % pxProducts.length;
-      pxSetDragOffset(0);
-      pxUpdate();
-    }
-
-    function pxPrev() {
-      pxActive = (pxActive - 1 + pxProducts.length) % pxProducts.length;
-      pxSetDragOffset(0);
-      pxUpdate();
-    }
-
-    function pxPointerDown(event) {
-      pxDragging = true;
-      pxStartX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
-      pxCurrentX = pxStartX;
-      pxLastX = pxStartX;
-      pxLastTime = performance.now();
-      pxVelocity = 0;
-      pxStopAutoplay();
-      pxUpdate();
-    }
-
-    function pxPointerMove(event) {
-      if (!pxDragging) return;
-
-      const clientX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
-      const now = performance.now();
-      const delta = clientX - pxStartX;
-      const frameDelta = clientX - pxLastX;
-      const frameTime = Math.max(now - pxLastTime, 1);
-
-      pxVelocity = frameDelta / frameTime;
-      pxCurrentX = clientX;
-      pxLastX = clientX;
-      pxLastTime = now;
-      pxSetDragOffset(delta * 0.42);
-    }
-
-    function pxPointerUp() {
-      if (!pxDragging) return;
-
-      const delta = pxCurrentX - pxStartX;
-      const inertia = pxVelocity * 180;
-      const projected = delta + inertia;
-      const threshold = 58;
-
-      pxDragging = false;
-
-      if (projected < -threshold) {
-        pxNext();
-      } else if (projected > threshold) {
-        pxPrev();
-      } else {
-        pxSetDragOffset(0);
-        pxUpdate();
-      }
-
-      pxRestartAutoplay();
-    }
-
-    function pxStopAutoplay() {
-      clearInterval(pxAutoplay);
-    }
-
-    function pxRestartAutoplay() {
-      pxStopAutoplay();
-      pxAutoplay = setInterval(pxNext, 5200);
-    }
-
-    document.querySelector(".px-next").addEventListener("click", () => {
-      pxNext();
-      pxRestartAutoplay();
-    });
-
-    document.querySelector(".px-prev").addEventListener("click", () => {
-      pxPrev();
-      pxRestartAutoplay();
-    });
-
-    pxStage.addEventListener("pointerdown", pxPointerDown);
-    window.addEventListener("pointermove", pxPointerMove);
-    window.addEventListener("pointerup", pxPointerUp);
-    window.addEventListener("pointercancel", pxPointerUp);
-
-    pxStage.addEventListener("touchstart", event => pxPointerDown(event), { passive: true });
-    pxStage.addEventListener("touchmove", event => pxPointerMove(event), { passive: true });
-    pxStage.addEventListener("touchend", pxPointerUp, { passive: true });
-
-    window.addEventListener("keydown", event => {
-      if (event.key === "ArrowRight") {
-        pxNext();
-        pxRestartAutoplay();
-      }
-
-      if (event.key === "ArrowLeft") {
-        pxPrev();
-        pxRestartAutoplay();
-      }
-    });
-
-    pxCarousel.addEventListener("mouseenter", pxStopAutoplay);
-    pxCarousel.addEventListener("mouseleave", pxRestartAutoplay);
-
-    pxBuild();
-    pxUpdate();
-    pxRestartAutoplay();
-  </script>
 </body>
 </html>
