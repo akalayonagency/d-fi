@@ -13,8 +13,6 @@
   --panel-soft:rgba(8,14,28,.48);
   --line:rgba(190,215,255,.22);
   --green:#42f3a0;
-  --blue:#7aa7ff;
-  --navy:#020712;
 }
 
 *{box-sizing:border-box}
@@ -38,7 +36,6 @@ body{
   isolation:isolate;
 }
 
-/* GLOW CENTRAL PREMIUM */
 .px-showcase::before{
   content:"";
   position:absolute;
@@ -47,12 +44,7 @@ body{
   width:620px;
   height:520px;
   transform:translateX(-50%);
-  background:
-    radial-gradient(circle,
-      rgba(255,255,255,.42) 0%,
-      rgba(125,170,255,.28) 24%,
-      rgba(32,68,130,.14) 48%,
-      transparent 72%);
+  background:radial-gradient(circle,rgba(255,255,255,.42),rgba(125,170,255,.28) 24%,rgba(32,68,130,.14) 48%,transparent 72%);
   filter:blur(44px);
   z-index:-1;
   animation:aura 5s ease-in-out infinite alternate;
@@ -63,7 +55,6 @@ body{
   to{opacity:1;transform:translateX(-50%) scale(1.05)}
 }
 
-/* STAGE */
 .device-stage{
   position:relative;
   height:365px;
@@ -71,7 +62,6 @@ body{
   overflow:visible;
 }
 
-/* SLIDE */
 .device-slide{
   position:absolute;
   top:32px;
@@ -82,10 +72,7 @@ body{
   transform-style:preserve-3d;
   cursor:pointer;
   filter:blur(8px) brightness(.55) saturate(.75);
-  transition:
-    transform 1.15s cubic-bezier(.19,1,.22,1),
-    opacity .9s ease,
-    filter 1s ease;
+  transition:transform 1.15s cubic-bezier(.19,1,.22,1),opacity .9s ease,filter 1s ease;
   will-change:transform,opacity,filter;
 }
 
@@ -102,55 +89,30 @@ body{
   z-index:5;
   opacity:.42;
   filter:blur(3px) brightness(.74);
-  transform:
-    translateX(calc(-50% - 285px))
-    translateY(28px)
-    rotateY(44deg)
-    rotateZ(-2deg)
-    translateZ(-120px)
-    scale(.72);
+  transform:translateX(calc(-50% - 285px)) translateY(28px) rotateY(44deg) rotateZ(-2deg) translateZ(-120px) scale(.72);
 }
 
 .device-slide.near-right{
   z-index:5;
   opacity:.42;
   filter:blur(3px) brightness(.74);
-  transform:
-    translateX(calc(-50% + 285px))
-    translateY(28px)
-    rotateY(-44deg)
-    rotateZ(2deg)
-    translateZ(-120px)
-    scale(.72);
+  transform:translateX(calc(-50% + 285px)) translateY(28px) rotateY(-44deg) rotateZ(2deg) translateZ(-120px) scale(.72);
 }
 
 .device-slide.far-left{
   z-index:2;
   opacity:.18;
   filter:blur(6px) brightness(.5);
-  transform:
-    translateX(calc(-50% - 470px))
-    translateY(58px)
-    rotateY(58deg)
-    rotateZ(-4deg)
-    translateZ(-260px)
-    scale(.52);
+  transform:translateX(calc(-50% - 470px)) translateY(58px) rotateY(58deg) rotateZ(-4deg) translateZ(-260px) scale(.52);
 }
 
 .device-slide.far-right{
   z-index:2;
   opacity:.18;
   filter:blur(6px) brightness(.5);
-  transform:
-    translateX(calc(-50% + 470px))
-    translateY(58px)
-    rotateY(-58deg)
-    rotateZ(4deg)
-    translateZ(-260px)
-    scale(.52);
+  transform:translateX(calc(-50% + 470px)) translateY(58px) rotateY(-58deg) rotateZ(4deg) translateZ(-260px) scale(.52);
 }
 
-/* FLOAT APPLE */
 .duo{
   position:relative;
   width:100%;
@@ -160,9 +122,7 @@ body{
 }
 
 .device-slide.active .duo{
-  animation:
-    floatApple 5s ease-in-out infinite,
-    focusPop .7s cubic-bezier(.19,1,.22,1);
+  animation:floatApple 5s ease-in-out infinite,focusPop .7s cubic-bezier(.19,1,.22,1);
 }
 
 @keyframes floatApple{
@@ -175,7 +135,6 @@ body{
   100%{transform:translateY(0) scale(1);filter:brightness(1)}
 }
 
-/* HALO PRODUIT */
 .device-slide.active .duo::before{
   content:"";
   position:absolute;
@@ -189,7 +148,6 @@ body{
   z-index:-1;
 }
 
-/* PHONES */
 .phone{
   position:absolute;
   top:0;
@@ -224,7 +182,6 @@ body{
   display:block;
 }
 
-/* SVG PLACEHOLDERS */
 .phone-svg{
   width:100%;
   height:100%;
@@ -232,7 +189,6 @@ body{
   overflow:visible;
 }
 
-/* ARROWS */
 .nav-arrow{
   position:absolute;
   top:176px;
@@ -248,23 +204,18 @@ body{
   place-items:center;
   font-size:34px;
   cursor:pointer;
-  box-shadow:
-    0 20px 45px rgba(0,0,0,.25),
-    inset 0 0 18px rgba(255,255,255,.08);
+  box-shadow:0 20px 45px rgba(0,0,0,.25),inset 0 0 18px rgba(255,255,255,.08);
   transition:.28s ease;
 }
 
 .nav-arrow:hover{
   transform:scale(1.1);
-  box-shadow:
-    0 24px 55px rgba(0,0,0,.34),
-    0 0 30px rgba(122,167,255,.42);
+  box-shadow:0 24px 55px rgba(0,0,0,.34),0 0 30px rgba(122,167,255,.42);
 }
 
 .nav-arrow.prev{left:270px}
 .nav-arrow.next{right:270px}
 
-/* CONTENT */
 .content-grid{
   display:grid;
   grid-template-columns:255px minmax(430px,1fr) 255px;
@@ -278,18 +229,12 @@ body{
   border:1px solid var(--line);
   border-radius:24px;
   backdrop-filter:blur(18px);
-  box-shadow:
-    0 26px 70px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow:0 26px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-.details-card,
-.price-card{
-  padding:22px;
-}
+.details-card,.price-card{padding:22px}
 
-.details-card h3,
-.price-label{
+.details-card h3,.price-label{
   margin:0 0 16px;
   font-size:14px;
   font-weight:900;
@@ -314,9 +259,7 @@ h1{
   font-size:clamp(44px,6vw,74px);
   line-height:.9;
   letter-spacing:-.07em;
-  text-shadow:
-    0 0 25px rgba(255,255,255,.25),
-    0 18px 45px rgba(0,0,0,.42);
+  text-shadow:0 0 25px rgba(255,255,255,.25),0 18px 45px rgba(0,0,0,.42);
 }
 
 .subtitle{
@@ -343,18 +286,13 @@ h1{
   font-size:17px;
   font-weight:950;
   cursor:pointer;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.08) inset,
-    0 24px 48px rgba(0,0,0,.30),
-    0 0 34px rgba(122,167,255,.30);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 24px 48px rgba(0,0,0,.30),0 0 34px rgba(122,167,255,.30);
   transition:.28s ease;
 }
 
 .reserve:hover{
   transform:translateY(-2px) scale(1.035);
-  box-shadow:
-    0 30px 68px rgba(0,0,0,.40),
-    0 0 48px rgba(122,167,255,.46);
+  box-shadow:0 30px 68px rgba(0,0,0,.40),0 0 48px rgba(122,167,255,.46);
 }
 
 .price{
@@ -413,7 +351,6 @@ h1{
   font-weight:800;
 }
 
-/* RESPONSIVE */
 @media(max-width:1050px){
   .px-showcase{min-height:900px}
   .content-grid{
@@ -502,7 +439,7 @@ const products=[
     warranty:"12 mois",
     price:"899€",
     stock:"2 pièces disponibles",
-    camera:"Pro Fusion 48 MP",
+    camera:"Triple caméra Pro",
     screen:"ProMotion 120 Hz",
     chip:"A19 Pro",
     finish:["#24415f","#07111f"],
@@ -510,110 +447,88 @@ const products=[
     brand:"apple",
     shape:"island",
     cameraCount:3,
-
-    /* TES IMAGES */
-    frontImg:"face.png",
-    backImg:"dos.png"
+    frontImg:"iphone17-face.png",
+    backImg:"iphone17-dos.png"
   },
   {
-    title:"iPhone 17",
-    color:"Lavande",
-    storage:"128 Go",
-    state:"Excellent état",
-    battery:"98%",
-    warranty:"12 mois",
-    price:"749€",
-    stock:"3 pièces disponibles",
-    camera:"Dual Fusion 48 MP",
-    screen:"6,3″ ProMotion",
-    chip:"A19",
-    finish:["#cab8ff","#6b5da8"],
-    accent:"#d7caff",
-    brand:"apple",
-    shape:"island",
-    cameraCount:2,
-    frontImg:"",
-    backImg:""
-  },
-  {
-    title:"Samsung S25 Ultra",
-    color:"Titanium noir",
+    title:"iPhone 16 Pro",
+    color:"Titane naturel",
     storage:"256 Go",
     state:"Très bon état",
-    battery:"94%",
+    battery:"95%",
     warranty:"12 mois",
-    price:"829€",
-    stock:"1 pièce disponible",
-    camera:"Quad caméra",
-    screen:"AMOLED 120 Hz",
-    chip:"Snapdragon Elite",
-    finish:["#3a3d42","#08090d"],
-    accent:"#b9c7ff",
-    brand:"samsung",
-    shape:"punch",
-    cameraCount:4,
-    frontImg:"",
-    backImg:""
+    price:"799€",
+    stock:"3 pièces disponibles",
+    camera:"Triple caméra Pro",
+    screen:"ProMotion 120 Hz",
+    chip:"A18 Pro",
+    finish:["#c3beb3","#4f4b45"],
+    accent:"#d8d2c4",
+    brand:"apple",
+    shape:"island",
+    cameraCount:3,
+    frontImg:"iphone16-face.png",
+    backImg:"iphone16-dos.png"
   },
   {
-    title:"Google Pixel 9 Pro",
-    color:"Noir volcanique",
+    title:"iPhone 15 Pro",
+    color:"Titane bleu",
     storage:"128 Go",
     state:"Très bon état",
     battery:"93%",
     warranty:"6 mois",
-    price:"579€",
-    stock:"4 pièces disponibles",
-    camera:"Triple caméra IA",
-    screen:"OLED 120 Hz",
-    chip:"Tensor Pro",
-    finish:["#303743","#08101c"],
-    accent:"#8bb7ff",
-    brand:"google",
-    shape:"punch",
-    cameraCount:3,
-    frontImg:"",
-    backImg:""
-  },
-  {
-    title:"Xiaomi 15 Ultra",
-    color:"Argent chrome",
-    storage:"512 Go",
-    state:"Excellent état",
-    battery:"97%",
-    warranty:"12 mois",
-    price:"799€",
+    price:"699€",
     stock:"2 pièces disponibles",
-    camera:"Optique Leica",
-    screen:"QHD+ 120 Hz",
-    chip:"Snapdragon Elite",
-    finish:["#d8dde6","#616b78"],
-    accent:"#e9f0ff",
-    brand:"xiaomi",
-    shape:"punch",
-    cameraCount:4,
-    frontImg:"",
-    backImg:""
+    camera:"Triple caméra Pro",
+    screen:"OLED 120 Hz",
+    chip:"A17 Pro",
+    finish:["#384b63","#101925"],
+    accent:"#86a9d7",
+    brand:"apple",
+    shape:"island",
+    cameraCount:3,
+    frontImg:"iphone15-face.png",
+    backImg:"iphone15-dos.png"
   },
   {
-    title:"Galaxy Z Fold6",
-    color:"Bleu nuit",
-    storage:"256 Go",
-    state:"Bon état",
-    battery:"90%",
+    title:"iPhone 14 Pro",
+    color:"Violet intense",
+    storage:"128 Go",
+    state:"Très bon état",
+    battery:"89%",
     warranty:"6 mois",
-    price:"899€",
-    stock:"1 pièce disponible",
+    price:"579€",
+    stock:"2 pièces disponibles",
     camera:"Triple caméra",
-    screen:"Écran pliant",
-    chip:"Snapdragon 8 Gen",
-    finish:["#25395a","#07101d"],
-    accent:"#6ea8ff",
-    brand:"samsung",
-    shape:"punch",
+    screen:"OLED 120 Hz",
+    chip:"A16",
+    finish:["#6f5d88","#322947"],
+    accent:"#b79cff",
+    brand:"apple",
+    shape:"island",
     cameraCount:3,
-    frontImg:"",
-    backImg:""
+    frontImg:"iphone14-face.png",
+    backImg:"iphone14-dos.png"
+  },
+  {
+    title:"iPhone 13",
+    color:"Bleu",
+    storage:"128 Go",
+    state:"Bon état",
+    battery:"87%",
+    warranty:"6 mois",
+    price:"449€",
+    stock:"4 pièces disponibles",
+    camera:"Double caméra",
+    screen:"OLED",
+    chip:"A15",
+    finish:["#2f78b7","#10263d"],
+    accent:"#7bbcff",
+    brand:"apple",
+    shape:"notch",
+    cameraCount:2,
+    frontImg:"iphone13-face.png",
+    backImg:"iphone13-dos.png"
   }
 ];
 
@@ -639,6 +554,7 @@ function svgPhone(p,side){
 
   let cameras="";
   const positions=[[72,70],[112,70],[72,112],[112,112]];
+
   for(let i=0;i<p.cameraCount;i++){
     const x=positions[i][0];
     const y=positions[i][1];
@@ -650,7 +566,7 @@ function svgPhone(p,side){
 
   const notch=p.shape==="island"
     ? `<rect x="98" y="29" width="84" height="25" rx="13" fill="#020712"/>`
-    : `<circle cx="140" cy="42" r="8" fill="#020712"/>`;
+    : `<rect x="78" y="28" width="124" height="26" rx="13" fill="#020712"/>`;
 
   return `
   <svg class="phone-svg" viewBox="0 0 280 560" xmlns="http://www.w3.org/2000/svg">
@@ -659,13 +575,11 @@ function svgPhone(p,side){
         <stop offset="0%" stop-color="${c1}"/>
         <stop offset="100%" stop-color="${c2}"/>
       </linearGradient>
-
       <radialGradient id="shine-${id}" cx="34%" cy="15%" r="78%">
         <stop offset="0%" stop-color="rgba(255,255,255,.55)"/>
         <stop offset="42%" stop-color="rgba(255,255,255,.10)"/>
         <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
       </radialGradient>
-
       <linearGradient id="screen-${id}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="${p.accent}"/>
         <stop offset="42%" stop-color="#17072c"/>
@@ -684,9 +598,7 @@ function svgPhone(p,side){
         <rect x="44" y="42" width="112" height="112" rx="31" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.15)"/>
         ${cameras}
         <circle cx="126" cy="112" r="8" fill="#fff2bd"/>
-        <text x="140" y="302" text-anchor="middle" fill="rgba(0,0,0,.34)" font-size="42" font-weight="900">
-          ${p.brand==="apple"?"●":p.brand==="google"?"G":p.brand==="xiaomi"?"mi":"S"}
-        </text>
+        <text x="140" y="302" text-anchor="middle" fill="rgba(0,0,0,.34)" font-size="42" font-weight="900">●</text>
       `
       : `
         <rect x="36" y="28" width="208" height="504" rx="32" fill="#020712"/>
