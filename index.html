@@ -1,276 +1,620 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PhoneXpress | Catalogue Premium</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PhoneXpress Premium Carousel - Intégration</title>
 
-    <style>
-        :root {
-            --white: #f7fbff;
-            --muted: rgba(247, 251, 255, .7);
-            --panel: rgba(8, 14, 28, .8);
-            --line: rgba(190, 215, 255, .15);
-            --green: #42f3a0;
-            --accent: #83aaff; /* Dynamique via JS */
-            --transition: 0.8s cubic-bezier(0.19, 1, 0.22, 1);
-        }
+<style>
+/* Variables CSS pour un contrôle facile */
+:root {
+  --white: #f7fbff;
+  --muted: rgba(247, 251, 255, .6); /* Texte moins important */
+  --muted-bright: rgba(247, 251, 255, .8); /* Texte plus important */
+  --panel: rgba(8, 14, 28, .5); /* Panneaux avec transparence */
+  --line: rgba(190, 215, 255, .1); /* Lignes de séparation */
+  --green: #42f3a0; /* Couleur pour le stock */
+  --accent: #83aaff; /* Couleur d'accentuation par défaut (sera mise à jour par JS) */
+  --transition-speed: 0.8s;
+  --transition-cubic: cubic-bezier(0.19, 1, 0.22, 1);
+}
 
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #020712;
-            color: var(--white);
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+* {
+  box-sizing: border-box;
+}
 
-        .px-showcase {
-            position: relative;
-            width: 100%;
-            max-width: 1250px;
-            margin: auto;
-            padding: 40px 20px;
-        }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--white);
+  overflow-x: hidden;
+  /* Fond transparent pour l'intégration */
+  background: transparent;
+  min-height: 100vh;
+}
 
-        /* Aura dynamique derrière le téléphone actif */
-        .px-showcase::before {
-            content: "";
-            position: absolute;
-            top: 15%; left: 50%;
-            width: 600px; height: 450px;
-            transform: translateX(-50%);
-            background: radial-gradient(circle, var(--accent), transparent 70%);
-            opacity: 0.2;
-            filter: blur(60px);
-            z-index: -1;
-            transition: background var(--transition);
-        }
+/* Conteneur principal */
+.px-showcase {
+  position: relative;
+  width: 100%;
+  max-width: 1250px;
+  margin: auto;
+  padding: 40px 20px;
+  /* Isolation pour le z-index de l'aura */
+  isolation: isolate;
+}
 
-        .device-stage {
-            position: relative;
-            height: 400px;
-            perspective: 2000px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+/* Aura de lumière dynamique derrière le téléphone actif */
+.px-showcase::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 600px;
+  height: 450px;
+  transform: translateX(-50%);
+  /* Dégradé radial utilisant la couleur d'accentuation */
+  background: radial-gradient(circle, var(--accent), transparent 70%);
+  opacity: 0.15;
+  filter: blur(60px);
+  z-index: -1;
+  transition: background var(--transition-speed);
+}
 
-        /* --- Logique des Slides --- */
-        .device-slide {
-            position: absolute;
-            width: 180px;
-            height: 360px;
-            transition: all var(--transition), opacity 0.6s ease, filter 0.8s ease;
-            cursor: pointer;
-            user-select: none;
-            will-change: transform, opacity;
-        }
+/* Scène 3D des appareils */
+.device-stage {
+  position: relative;
+  height: 400px;
+  perspective: 2000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        /* Positions */
-        .device-slide { opacity: 0; transform: translateZ(-500px); pointer-events: none; }
-        
-        .device-slide[data-pos="0"] { /* Active */
-            opacity: 1; z-index: 10; pointer-events: auto;
-            width: 440px; transform: translateZ(200px);
-        }
-        .device-slide[data-pos="-1"] { opacity: 0.4; z-index: 5; transform: translateX(-320px) rotateY(45deg) scale(0.8); filter: blur(2px); }
-        .device-slide[data-pos="1"] { opacity: 0.4; z-index: 5; transform: translateX(320px) rotateY(-45deg) scale(0.8); filter: blur(2px); }
-        .device-slide[data-pos="-2"] { opacity: 0.1; z-index: 2; transform: translateX(-550px) rotateY(60deg) scale(0.6); filter: blur(6px); }
-        .device-slide[data-pos="2"] { opacity: 0.1; z-index: 2; transform: translateX(550px) rotateY(-60deg) scale(0.6); filter: blur(6px); }
+/* Structure de chaque slide d'appareil */
+.device-slide {
+  position: absolute;
+  width: 180px;
+  height: 360px;
+  transition: all var(--transition-speed) var(--transition-cubic), opacity 0.6s ease, filter 0.8s ease;
+  cursor: pointer;
+  user-select: none;
+  /* Optimisation des performances pour les transformations */
+  will-change: transform, opacity;
+  /* Position par défaut cachée */
+  opacity: 0;
+  transform: translateZ(-500px);
+  pointer-events: none;
+}
 
-        .duo { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
-        .phone { position: absolute; transition: var(--transition); filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5)); }
-        
-        .device-slide[data-pos="0"] .phone.front { transform: translateX(45px) rotateY(-10deg); }
-        .device-slide[data-pos="0"] .phone.back { transform: translateX(215px) rotateY(15deg); opacity: 1; }
-        .device-slide:not([data-pos="0"]) .phone.back { opacity: 0; }
-        .device-slide:not([data-pos="0"]) .phone.front { transform: translateX(0); }
+/* Positions spécifiques des slides */
+.device-slide[data-pos="0"] { /* Slide Active */
+  opacity: 1;
+  z-index: 10;
+  pointer-events: auto;
+  width: 440px;
+  transform: translateZ(200px);
+}
 
-        .phone img, .phone svg { width: 160px; height: auto; display: block; }
+.device-slide[data-pos="-1"] { /* Proche Gauche */
+  opacity: 0.35;
+  z-index: 5;
+  transform: translateX(-320px) rotateY(45deg) scale(0.8);
+  filter: blur(2px);
+}
 
-        /* --- Navigation --- */
-        .nav-arrow {
-            position: absolute; top: 180px; z-index: 30;
-            width: 54px; height: 54px; border-radius: 50%;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--line);
-            color: white; backdrop-filter: blur(10px); cursor: pointer;
-            transition: 0.3s; font-size: 24px;
-        }
-        .nav-arrow:hover { background: var(--accent); border-color: white; color: #000; transform: scale(1.1); }
-        .nav-arrow.prev { left: 5%; }
-        .nav-arrow.next { right: 5%; }
+.device-slide[data-pos="1"] { /* Proche Droite */
+  opacity: 0.35;
+  z-index: 5;
+  transform: translateX(320px) rotateY(-45deg) scale(0.8);
+  filter: blur(2px);
+}
 
-        /* --- Grille de contenu --- */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 280px 1fr 280px;
-            gap: 30px; margin-top: 20px; align-items: start;
-        }
+.device-slide[data-pos="-2"] { /* Loin Gauche */
+  opacity: 0.08;
+  z-index: 2;
+  transform: translateX(-550px) rotateY(60deg) scale(0.6);
+  filter: blur(6px);
+}
 
-        .glass-card {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 24px;
-            backdrop-filter: blur(20px);
-        }
+.device-slide[data-pos="2"] { /* Loin Droite */
+  opacity: 0.08;
+  z-index: 2;
+  transform: translateX(550px) rotateY(-60deg) scale(0.6);
+  filter: blur(6px);
+}
 
-        .main-copy { text-align: center; }
-        h1 { font-size: 3.5rem; margin: 0; letter-spacing: -2px; }
-        .price { font-size: 3rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
+/* Conteneur pour le duo de téléphones (face et dos) */
+.duo {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
 
-        .pill-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
-        .pill { padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.05); font-size: 0.8rem; border: 1px solid var(--line); }
+/* Style commun pour les téléphones face et dos */
+.phone {
+  position: absolute;
+  transition: var(--transition-speed) var(--transition-cubic);
+  /* Ombre portée pour le réalisme */
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+}
 
-        .btn-buy {
-            background: var(--white); color: #000; border: none;
-            padding: 16px 40px; border-radius: 40px; font-weight: 700;
-            cursor: pointer; transition: 0.3s; margin-top: 20px;
-        }
-        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--accent); }
+/* Positionnement du téléphone face quand actif */
+.device-slide[data-pos="0"] .phone.front {
+  transform: translateX(45px) rotateY(-10deg);
+}
 
-        @media (max-width: 1000px) {
-            .content-grid { grid-template-columns: 1fr; }
-            .device-slide[data-pos="0"] { width: 320px; }
-            .nav-arrow { top: 120px; }
-        }
-    </style>
+/* Positionnement du téléphone dos quand actif */
+.device-slide[data-pos="0"] .phone.back {
+  transform: translateX(215px) rotateY(15deg);
+  opacity: 1;
+}
+
+/* Cacher le dos quand non actif */
+.device-slide:not([data-pos="0"]) .phone.back {
+  opacity: 0;
+}
+
+/* Position centrale de la face quand non actif */
+.device-slide:not([data-pos="0"]) .phone.front {
+  transform: translateX(0);
+}
+
+/* Style pour les images réelles ou SVG */
+.phone img, .phone svg {
+  width: 160px;
+  height: auto;
+  display: block;
+}
+
+/* --- Boutons de Navigation --- */
+.nav-arrow {
+  position: absolute;
+  top: 180px;
+  z-index: 30;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  /* Effet de verre flouté */
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  color: white;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 24px;
+}
+
+.nav-arrow:hover {
+  background: var(--accent);
+  border-color: white;
+  color: #000;
+  transform: scale(1.1);
+}
+
+.nav-arrow.prev { left: 5%; }
+.nav-arrow.next { right: 5%; }
+
+/* --- Grille de contenu textuel --- */
+.content-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 30px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+/* Cartes avec effet de transparence */
+.glass-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 24px;
+  backdrop-filter: blur(15px);
+}
+
+.main-copy {
+  text-align: center;
+}
+
+h1 {
+  font-size: 3.2rem;
+  margin: 0;
+  letter-spacing: -2px;
+}
+
+.price {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 8px 0;
+}
+
+.btn-buy {
+  background: var(--white);
+  color: #000;
+  border: none;
+  padding: 16px 40px;
+  border-radius: 40px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s ease;
+  margin-top: 18px;
+}
+
+.btn-buy:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px var(--accent);
+}
+
+/* --- Bloc des bulles d'infos détaillées (Pills) --- */
+.pills-detail-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 25px;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+/* Style individuel des bulles, basé sur ton image */
+.pill-detail {
+  padding: 8px 18px;
+  border-radius: 25px;
+  background: rgba(144, 154, 169, 0.6); /* Couleur basée sur ton image */
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff; /* Texte blanc pour la lisibilité */
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(5px);
+}
+
+/* Style pour les labels techniques dans les bulles */
+.pill-tech-label {
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+/* Style de base pour les autres pills (stockage, garantie) */
+.pills-base-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.pill-base {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  font-size: 0.75rem;
+  border: 1px solid var(--line);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1100px) {
+  .px-showcase {
+    max-width: 900px;
+  }
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .main-copy {
+    grid-column: 1 / -1;
+    order: 1;
+  }
+  .left-aside {
+    order: 2;
+  }
+  .right-aside {
+    order: 3;
+  }
+  .nav-arrow.prev { left: 10%; }
+  .nav-arrow.next { right: 10%; }
+}
+
+@media (max-width: 768px) {
+  .px-showcase {
+    padding-inline: 10px;
+  }
+  .device-slide[data-pos="0"] {
+    width: 320px;
+  }
+  .phone.front {
+    left: 20px;
+  }
+  .phone.back {
+    right: 20px;
+  }
+  .nav-arrow {
+    top: 140px;
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  h1 {
+    font-size: 2.5rem;
+  }
+  .price {
+    font-size: 2.2rem;
+  }
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  .left-aside, .right-aside {
+    order: unset;
+  }
+}
+</style>
 </head>
 <body>
 
 <section class="px-showcase" id="mainShowcase" aria-roledescription="carousel">
-    <div class="device-stage" id="stage"></div>
+  <div class="device-stage" id="stage"></div>
 
-    <button class="nav-arrow prev" aria-label="Précédent" onclick="move(-1)">‹</button>
-    <button class="nav-arrow next" aria-label="Suivant" onclick="move(1)">›</button>
+  <button class="nav-arrow prev" aria-label="Précédent" onclick="move(-1)">‹</button>
+  <button class="nav-arrow next" aria-label="Suivant" onclick="move(1)">›</button>
 
-    <div class="content-grid" aria-live="polite">
-        <aside class="glass-card">
-            <h3 style="font-size:0.9rem; text-transform:uppercase; opacity:0.6">Fiche Technique</h3>
-            <div id="tech-details"></div>
-        </aside>
+  <div class="content-grid" aria-live="polite">
+    <aside class="glass-card left-aside">
+      <h3 style="font-size:0.8rem; text-transform:uppercase; opacity:0.6; margin-top:0">Fiche Technique</h3>
+      <div id="tech-details"></div>
+    </aside>
 
-        <main class="main-copy">
-            <h1 id="title">--</h1>
-            <div class="price" id="price">--€</div>
-            <p id="desc" style="opacity:0.7; line-height:1.6"></p>
-            <button class="btn-buy">Réserver maintenant</button>
-        </main>
+    <main class="main-copy">
+      <h1 id="title">--</h1>
+      <div class="price" id="price">--€</div>
+      <p id="desc" style="opacity:0.7; line-height:1.6; max-width:550px; margin-inline:auto"></p>
+      
+      <div class="pills-detail-box" id="pills-detail"></div>
+      
+      <button class="btn-buy">Réserver maintenant</button>
+    </main>
 
-        <aside class="glass-card">
-            <h3 style="font-size:0.9rem; text-transform:uppercase; opacity:0.6">Disponibilité</h3>
-            <div id="stock-status" style="margin: 15px 0"></div>
-            <div class="pill-box" id="pills"></div>
-        </aside>
-    </div>
+    <aside class="glass-card right-aside">
+      <h3 style="font-size:0.8rem; text-transform:uppercase; opacity:0.6; margin-top:0">Disponibilité</h3>
+      <div id="stock-status" style="margin: 15px 0"></div>
+      <div class="pills-base-box" id="pills-base"></div>
+    </aside>
+  </div>
 </section>
 
 <script>
+// Tableau de données enrichi pour les bulles d'info détaillées.
+// J'ai complété le modèle "Violet intense" avec toutes les données de la photo.
+// Tu devras faire de même pour les autres modèles.
 const products = [
-    { id: 1, title: "iPhone 17 Pro", price: "1299€", accent: "#83aaff", battery: "100%", storage: "256GB", stock: "En stock", chip: "A19 Pro", desc: "La nouvelle frontière de la puissance mobile avec puce photonique." },
-    { id: 2, title: "iPhone 16 Pro", price: "989€", accent: "#d8d2c4", battery: "96%", storage: "256GB", stock: "3 restants", chip: "A18 Pro", desc: "Le titane naturel allié à une polyvalence photographique pro." },
-    { id: 3, title: "iPhone 15 Pro", price: "749€", accent: "#4b617a", battery: "92%", storage: "128GB", stock: "En stock", chip: "A17 Pro", desc: "Légèreté et performance avec le premier châssis titane." },
-    { id: 4, title: "iPhone 14 Pro", price: "599€", accent: "#6f5d88", battery: "88%", storage: "128GB", stock: "Dernière pièce", chip: "A16", desc: "L'arrivée de la Dynamic Island pour une interface réinventée." },
-    { id: 5, title: "iPhone 13", price: "429€", accent: "#2f78b7", battery: "89%", storage: "128GB", stock: "En stock", chip: "A15", desc: "Un classique indémodable avec une autonomie exceptionnelle." }
+  {
+    id: 1,
+    title: "iPhone 17 Pro",
+    price: "1299€",
+    accent: "#83aaff",
+    battery: "100%",
+    storage: "256GB",
+    stock: "En stock",
+    chip: "A19 Pro",
+    // Images spécifiques pour le 17
+    frontImg: "iphone17-face.png",
+    backImg: "iphone17-dos.png",
+    // Données détaillées (par défaut pour l'exemple)
+    detailPills: [ "Bleu intense", "256 Go", "120 Hz", "A19", "Triple caméra", "12 mois" ],
+    desc: "La nouvelle frontière de la puissance mobile avec puce photonique."
+  },
+  {
+    id: 2,
+    title: "iPhone 16 Pro",
+    price: "989€",
+    accent: "#d8d2c4",
+    battery: "96%",
+    storage: "256GB",
+    stock: "3 restants",
+    chip: "A18 Pro",
+    // Images spécifiques pour le 16
+    frontImg: "iphone16-face.png",
+    backImg: "iphone16-dos.png",
+    // Données détaillées (par défaut pour l'exemple)
+    detailPills: [ "Titane naturel", "256 Go", "120 Hz", "A18", "Triple caméra", "12 mois" ],
+    desc: "Le titane naturel allié à une polyvalence photographique pro."
+  },
+  {
+    id: 3,
+    title: "iPhone 15 Pro",
+    price: "749€",
+    accent: "#4b617a",
+    battery: "92%",
+    storage: "128GB",
+    stock: "En stock",
+    chip: "A17 Pro",
+    // Images spécifiques pour le 15
+    frontImg: "iphone15-face.png",
+    backImg: "iphone15-dos.png",
+    // Données détaillées (par défaut pour l'exemple)
+    detailPills: [ "Titane bleu", "128 Go", "120 Hz", "A17", "Triple caméra", "12 mois" ],
+    desc: "Légèreté et performance avec le premier châssis titane."
+  },
+  {
+    id: 4,
+    title: "iPhone 14 Pro",
+    price: "599€",
+    accent: "#6f5d88",
+    battery: "88%",
+    storage: "128GB",
+    stock: "Dernière pièce",
+    chip: "A16",
+    // Pas d'images pour le 14, il utilisera les SVG
+    // Données détaillées correspondant EXACTEMENT à l'image de référence
+    detailPills: [ "Violet intense", "128 Go stockage", "OLED 120 Hz", "A16", "Triple caméra", "6 mois" ],
+    desc: "L'arrivée de la Dynamic Island pour une interface réinventée."
+  },
+  {
+    id: 5,
+    title: "iPhone 13",
+    price: "429€",
+    accent: "#2f78b7",
+    battery: "89%",
+    storage: "128GB",
+    stock: "En stock",
+    chip: "A15",
+    // Pas d'images pour le 13, il utilisera les SVG
+    // Données détaillées (par défaut pour l'exemple)
+    detailPills: [ "Bleu", "128 Go", "OLED", "A15", "Double caméra", "6 mois" ],
+    desc: "Un classique indémodable avec une autonomie exceptionnelle."
+  }
 ];
 
 let currentIndex = 0;
-let autoPlay = setInterval(() => move(1), 5000);
+// Timer d'autoplay plus long pour laisser le temps de lire les bulles
+let autoPlay = setInterval(() => move(1), 7000);
 
 const stage = document.getElementById('stage');
 const showcase = document.getElementById('mainShowcase');
 
-// Initialisation du DOM permanent
+// Initialisation du DOM permanent des appareils
 function init() {
-    products.forEach((p, i) => {
-        const slide = document.createElement('div');
-        slide.className = 'device-slide';
-        slide.dataset.index = i;
-        slide.innerHTML = `
-            <div class="duo">
-                <div class="phone front">${getPlaceholderSVG(p.accent, 'FRONT')}</div>
-                <div class="phone back">${getPlaceholderSVG(p.accent, 'BACK')}</div>
-            </div>
-        `;
-        slide.onclick = () => { currentIndex = i; update(); };
-        stage.appendChild(slide);
-    });
-    update();
+  products.forEach((p, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'device-slide';
+    slide.dataset.index = i;
+
+    // Décision pour les images ou les SVG placeholders
+    const frontContent = p.frontImg ? `<img src="${p.frontImg}" alt="${p.title} face">` : getPlaceholderSVG(p.accent, 'FRONT');
+    const backContent = p.backImg ? `<img src="${p.backImg}" alt="${p.title} dos">` : getPlaceholderSVG(p.accent, 'BACK');
+
+    slide.innerHTML = `
+      <div class="duo">
+        <div class="phone front">${frontContent}</div>
+        <div class="phone back">${backContent}</div>
+      </div>
+    `;
+    // Cliquer sur un slide non actif le ramène au centre
+    slide.onclick = () => { if(i !== currentIndex) { currentIndex = i; update(); } };
+    stage.appendChild(slide);
+  });
+  update();
 }
 
+// Mise à jour de l'état visuel du carousel
 function update() {
-    // 1. Positionnement des slides
-    document.querySelectorAll('.device-slide').forEach((slide, i) => {
-        let offset = i - currentIndex;
-        // Gérer la boucle infinie pour le positionnement
-        if (offset > 2) offset -= products.length;
-        if (offset < -2) offset += products.length;
-        slide.dataset.pos = offset;
-    });
+  // 1. Positionnement mathématique des slides dans l'espace 3D
+  document.querySelectorAll('.device-slide').forEach((slide, i) => {
+    let offset = i - currentIndex;
+    // Gérer la boucle infinie pour le positionnement visible
+    const halfLen = Math.floor(products.length / 2);
+    if (offset > halfLen) offset -= products.length;
+    if (offset < -halfLen) offset += products.length;
+    slide.dataset.pos = offset;
+  });
 
-    // 2. Mise à jour des textes
-    const p = products[currentIndex];
-    document.getElementById('title').textContent = p.title;
-    document.getElementById('price').textContent = p.price;
-    document.getElementById('desc').textContent = p.desc;
-    document.body.style.setProperty('--accent', p.accent);
+  // 2. Mise à jour des textes principaux et de la couleur d'accentuation
+  const p = products[currentIndex];
+  document.getElementById('title').textContent = p.title;
+  document.getElementById('price').textContent = p.price;
+  document.getElementById('desc').textContent = p.desc;
+  // Injection de la couleur d'accentuation en variable CSS
+  document.body.style.setProperty('--accent', p.accent);
 
-    // 3. Mise à jour des détails
-    document.getElementById('tech-details').innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin:10px 0; border-bottom:1px solid var(--line); padding-bottom:5px">
-            <span>Batterie</span> <b>${p.battery}</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin:10px 0">
-            <span>Processeur</span> <b>${p.chip}</b>
-        </div>
-    `;
+  // 3. Mise à jour de la fiche technique
+  document.getElementById('tech-details').innerHTML = `
+    <div style="display:flex; justify-content:space-between; margin:10px 0; border-bottom:1px solid var(--line); padding-bottom:5px">
+      <span style="color:var(--muted-bright)">Batterie</span> <b>${p.battery}</b>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin:10px 0">
+      <span style="color:var(--muted-bright)">Processeur</span> <b>${p.chip}</b>
+    </div>
+  `;
 
-    document.getElementById('stock-status').innerHTML = `
-        <span style="color:var(--green)">●</span> ${p.stock}
-    `;
+  // 4. Mise à jour de la disponibilité
+  document.getElementById('stock-status').innerHTML = `
+    <span style="color:var(--green); margin-right:5px">●</span> ${p.stock}
+  `;
 
-    document.getElementById('pills').innerHTML = `
-        <span class="pill">${p.storage}</span>
-        <span class="pill">Garantie 12 mois</span>
-    `;
+  // 5. Mise à jour des pills de base (stockage, garantie)
+  document.getElementById('pills-base').innerHTML = `
+    <span class="pill-base">${p.storage}</span>
+    <span class="pill-base">Garantie 12 mois</span>
+  `;
+
+  // 6. Mise à jour des bulles d'infos détaillées, correspondant au style de la photo
+  const pillsDetailContainer = document.getElementById('pills-detail');
+  pillsDetailContainer.innerHTML = '';
+  
+  // Fonction utilitaire pour extraire la valeur et le label technique
+  const getTechPair = (pillText) => {
+    // Liste des labels techniques basés sur ton image
+    const techLabels = ["stockage", "Hz", "caméra", "mois"];
+    const foundLabel = techLabels.find(label => pillText.includes(label));
+    
+    if(foundLabel) {
+      // Sépare la valeur du label pour le style
+      const valuePart = pillText.replace(foundLabel, '').trim();
+      // Gère le cas spécial du mois (ex: "6 mois")
+      const formattedLabel = foundLabel === "mois" ? `mois garantie` : foundLabel;
+      return `<span class="pill-tech-label">${formattedLabel}</span> ${valuePart}`;
+    }
+    // Gère le cas de la batterie (ex: "Batterie 89%")
+    if(pillText.startsWith("Batterie")) {
+      const batteryValue = pillText.replace("Batterie", '').trim();
+      return `<span class="pill-tech-label">Batterie</span> ${batteryValue}`;
+    }
+    // Par défaut, retourne le texte brut
+    return pillText;
+  };
+
+  p.detailPills.forEach(pillText => {
+    const pill = document.createElement('span');
+    pill.className = 'pill-detail';
+    // Style de la batterie spécifique (ex: "Batterie 89%")
+    if(pillText.startsWith("Batterie")) {
+       pill.innerHTML = getTechPair(pillText);
+    } 
+    // Style des labels techniques basés sur ton image
+    else if(["stockage", "Hz", "caméra", "mois"].some(label => pillText.includes(label))) {
+       pill.innerHTML = getTechPair(pillText);
+    } else {
+       pill.textContent = pillText;
+    }
+    pillsDetailContainer.appendChild(pill);
+  });
 }
 
+// Fonction de mouvement (précédent/suivant)
 function move(dir) {
-    currentIndex = (currentIndex + dir + products.length) % products.length;
-    update();
-    resetAutoPlay();
+  currentIndex = (currentIndex + dir + products.length) % products.length;
+  update();
+  resetAutoPlay();
 }
 
-// Support Tactile (Swipe)
+// Support Tactile (Swipe) pour mobile
 let touchStart = 0;
-showcase.addEventListener('touchstart', e => touchStart = e.touches[0].clientX);
+showcase.addEventListener('touchstart', e => touchStart = e.touches[0].clientX, {passive: true});
 showcase.addEventListener('touchend', e => {
-    const touchEnd = e.changedTouches[0].clientX;
-    if (touchStart - touchEnd > 50) move(1);
-    if (touchStart - touchEnd < -50) move(-1);
+  const touchEnd = e.changedTouches[0].clientX;
+  if (touchStart - touchEnd > 50) move(1);
+  if (touchStart - touchEnd < -50) move(-1);
 });
 
-// Gestion AutoPlay
+// Gestion AutoPlay : pause au survol
 showcase.onmouseenter = () => clearInterval(autoPlay);
 showcase.onmouseleave = () => resetAutoPlay();
 
 function resetAutoPlay() {
-    clearInterval(autoPlay);
-    autoPlay = setInterval(() => move(1), 5000);
+  clearInterval(autoPlay);
+  autoPlay = setInterval(() => move(1), 7000);
 }
 
-// Fonction utilitaire pour générer des placeholders SVG propres (remplaçables par <img>)
+// Fonction utilitaire pour générer des placeholders SVG propres si les images manquent
 function getPlaceholderSVG(color, label) {
-    return `
-    <svg viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
-        <rect width="160" height="320" rx="24" fill="#080e1c" stroke="rgba(255,255,255,0.1)"/>
-        <rect x="5" y="5" width="150" height="310" rx="20" fill="${color}" opacity="0.15"/>
-        <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12" opacity="0.5">${label}</text>
-    </svg>`;
+  return `
+  <svg viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+    <rect width="160" height="320" rx="24" fill="#080e1c" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+    <rect x="5%" y="2.5%" width="90%" height="95%" rx="20" fill="${color}" opacity="0.1"/>
+    <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12" opacity="0.4" font-weight="600">${label}</text>
+  </svg>`;
 }
 
+// Lancement du carousel
 init();
 </script>
 </body>
