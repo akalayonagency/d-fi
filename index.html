@@ -1,634 +1,218 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carousel Smartphones</title>
-  <style>
-    :root {
-      --blue: #2f96cf;
-      --blue-light: #78a8ff;
-      --blue-glow: #4f7dff;
-      --navy: #050914;
-      --navy-2: #0b1020;
-      --white: #ffffff;
-      --muted: rgba(255,255,255,.72);
-      --glass: rgba(5, 9, 20, .72);
-      --line: rgba(255,255,255,.14);
-      --green: #42f3a0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showcase premium</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+:root{
+  --white:#f7fbff;
+  --muted:rgba(247,251,255,.72);
+  --blue:#7aa7ff;
+  --navy:#020712;
+  --panel:rgba(2,7,18,.72);
+  --line:rgba(180,210,255,.22);
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--white);
-      background:
-        radial-gradient(circle at 20% 20%, rgba(79,125,255,.35), transparent 28%),
-        radial-gradient(circle at 80% 20%, rgba(47,150,207,.35), transparent 28%),
-        linear-gradient(135deg, #2f96cf 0%, #257eb0 48%, #0b1020 100%);
-      overflow-x: hidden;
-    }
+/* RESET */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial;
+  color:var(--white);
+  background:transparent;
+}
 
-    .hero {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      padding: 34px 56px 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      isolation: isolate;
-    }
+/* CONTAINER */
+.px{
+  max-width:1100px;
+  margin:auto;
+  padding:40px 20px;
+  text-align:center;
+  position:relative;
+}
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(#07101f 2px, transparent 2px);
-      background-size: 210px 170px;
-      opacity: .5;
-      z-index: -2;
-    }
+/* GLOW */
+.px::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:120px;
+  width:500px;
+  height:500px;
+  transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(120,168,255,.4), transparent 70%);
+  filter:blur(50px);
+  z-index:-1;
+}
 
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(255,255,255,.1), rgba(255,255,255,0));
-      z-index: -1;
-    }
+/* CAROUSEL */
+.stage{
+  position:relative;
+  height:350px;
+  perspective:1600px;
+}
 
-    .carousel {
-      width: min(1380px, 100%);
-      display: grid;
-      grid-template-columns: 280px minmax(520px, 1fr) 280px;
-      align-items: end;
-      gap: 26px;
-    }
+.slide{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform-style:preserve-3d;
+  transition:1s cubic-bezier(.19,1,.22,1);
+  cursor:pointer;
+}
 
-    .panel {
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      border: 1px solid var(--line);
-      box-shadow: 0 24px 60px rgba(0,0,0,.28);
-      border-radius: 28px;
-    }
+/* POSITIONS */
+.active{
+  transform:translate(-50%,-50%) translateZ(200px) scale(1);
+  z-index:10;
+}
+.left{
+  transform:translate(calc(-50% - 250px),-50%) rotateY(40deg) scale(.7);
+  opacity:.5;
+}
+.right{
+  transform:translate(calc(-50% + 250px),-50%) rotateY(-40deg) scale(.7);
+  opacity:.5;
+}
 
-    .details-card,
-    .price-card {
-      padding: 24px;
-      margin-bottom: 32px;
-    }
+/* PHONE */
+.duo{
+  display:flex;
+  gap:20px;
+  animation:float 5s ease-in-out infinite;
+}
 
-    .details-card h3,
-    .price-card .label {
-      margin: 0 0 18px;
-      font-size: 15px;
-      letter-spacing: .02em;
-    }
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
 
-    .detail-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 0;
-      border-top: 1px solid rgba(255,255,255,.1);
-      font-size: 14px;
-    }
+.phone{
+  width:150px;
+  filter:drop-shadow(0 30px 40px rgba(0,0,0,.6));
+}
 
-    .detail-row span:first-child {
-      color: var(--muted);
-    }
+.phone img{
+  width:100%;
+}
 
-    .detail-row strong {
-      font-weight: 800;
-    }
+/* TEXT */
+h1{
+  font-size:60px;
+  margin:10px 0;
+}
+.sub{
+  font-size:22px;
+  margin-bottom:15px;
+}
 
-    .price {
-      font-size: 44px;
-      line-height: 1;
-      margin: 8px 0 18px;
-      font-weight: 900;
-      text-shadow: 0 0 22px rgba(120,168,255,.35);
-    }
+/* BUTTON */
+.btn{
+  padding:15px 40px;
+  border-radius:30px;
+  border:none;
+  background:#0a0f1f;
+  color:white;
+  box-shadow:0 0 25px rgba(120,168,255,.5);
+  cursor:pointer;
+}
 
-    .price-card p {
-      margin: 0 0 20px;
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 14px;
-    }
-
-    .stock {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--green);
-      border: 1px solid rgba(66,243,160,.45);
-      background: rgba(66,243,160,.1);
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 16px var(--green);
-    }
-
-    .stage {
-      position: relative;
-      min-height: 680px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      text-align: center;
-    }
-
-    .top-pill {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      min-width: min(560px, 88vw);
-      padding: 22px 34px;
-      border-radius: 999px;
-      background: var(--navy);
-      border: 3px solid rgba(79,125,255,.35);
-      box-shadow: 0 14px 0 rgba(47,75,255,.45), 0 20px 45px rgba(0,0,0,.28), inset 0 -8px 18px rgba(79,125,255,.14);
-      color: #cfe0ff;
-      text-shadow: 0 0 8px var(--blue-light), 0 0 18px var(--blue-glow);
-      font-size: clamp(18px, 2vw, 28px);
-      font-weight: 900;
-      letter-spacing: .04em;
-    }
-
-    .phones-track {
-      position: relative;
-      width: 100%;
-      height: 470px;
-      margin-bottom: 12px;
-      perspective: 1200px;
-    }
-
-    .phone-slide {
-      position: absolute;
-      left: 50%;
-      top: 42%;
-      width: 220px;
-      height: 440px;
-      transform: translate(-50%, -50%) scale(.72);
-      opacity: .38;
-      filter: blur(5px);
-      transition: transform .65s cubic-bezier(.2,.8,.2,1), opacity .65s, filter .65s;
-      cursor: pointer;
-      transform-style: preserve-3d;
-    }
-
-    .phone-slide.active {
-      width: 290px;
-      height: 560px;
-      opacity: 1;
-      filter: blur(0);
-      z-index: 5;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .phone-slide.pos--2 { transform: translate(calc(-50% - 420px), -50%) scale(.55); }
-    .phone-slide.pos--1 { transform: translate(calc(-50% - 260px), -50%) scale(.68); opacity: .5; }
-    .phone-slide.pos-1  { transform: translate(calc(-50% + 260px), -50%) scale(.68); opacity: .5; }
-    .phone-slide.pos-2  { transform: translate(calc(-50% + 420px), -50%) scale(.55); }
-
-    .phone-card {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform .75s cubic-bezier(.16,1,.3,1);
-    }
-
-    /* Flip plus naturel : le téléphone tourne sur lui-même, sans déplacer le layout */
-    .phone-slide.flipped .phone-card {
-      transform: rotateY(180deg);
-    }
-
-    .phone-face {
-      position: absolute;
-      inset: 0;
-      backface-visibility: hidden;
-      border-radius: 42px;
-      overflow: hidden;
-      filter: drop-shadow(0 35px 45px rgba(0,0,0,.45));
-    }
-
-    .phone-face.back {
-      transform: rotateY(180deg);
-    }
-
-    .phone-svg,
-    .phone-face img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
-    .headline {
-      position: relative;
-      z-index: 10;
-      margin-top: -26px;
-    }
-
-    .status {
-      color: var(--blue-light);
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .42em;
-      text-shadow: 0 0 14px var(--blue-glow);
-    }
-
-    h1 {
-      margin: 12px 0 8px;
-      font-size: clamp(48px, 7vw, 82px);
-      line-height: .9;
-      letter-spacing: -.07em;
-      text-shadow: 0 18px 45px rgba(0,0,0,.38);
-    }
-
-    .subtitle {
-      margin: 0;
-      font-size: clamp(19px, 2vw, 28px);
-      font-weight: 900;
-    }
-
-    .desc {
-      max-width: 650px;
-      margin: 14px auto 22px;
-      color: rgba(255,255,255,.82);
-      line-height: 1.45;
-      font-size: 16px;
-    }
-
-    .reserve {
-      border: 0;
-      cursor: pointer;
-      padding: 20px 54px;
-      border-radius: 999px;
-      font-size: 18px;
-      font-weight: 950;
-      color: var(--navy);
-      background: linear-gradient(180deg, #fff, #dce8ff);
-      box-shadow: 0 18px 45px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.6) inset;
-      transition: transform .2s, box-shadow .2s;
-    }
-
-    .reserve:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 24px 60px rgba(0,0,0,.34), 0 0 30px rgba(120,168,255,.45);
-    }
-
-    .info-pills {
-      width: min(820px, 92vw);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      margin: 22px auto 0;
-    }
-
-    .pill {
-      padding: 12px 17px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.13);
-      border: 1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(12px);
-      color: rgba(255,255,255,.88);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .arrow {
-      position: absolute;
-      top: 45%;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.14);
-      color: white;
-      font-size: 36px;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      backdrop-filter: blur(8px);
-      z-index: 15;
-      transition: .2s;
-    }
-
-    .arrow:hover {
-      transform: scale(1.08);
-      background: rgba(255,255,255,.22);
-    }
-
-    .arrow.left { left: 0; }
-    .arrow.right { right: 0; }
-
-    .hint {
-      margin-top: 12px;
-      color: rgba(255,255,255,.62);
-      font-size: 12px;
-    }
-
-    @media (max-width: 1100px) {
-      .hero { padding: 28px 18px; }
-      .carousel {
-        grid-template-columns: 1fr;
-      }
-      .details-card,
-      .price-card {
-        order: 2;
-        margin: 0;
-        width: min(520px, 100%);
-        justify-self: center;
-      }
-      .stage { order: 1; min-height: 720px; }
-      .phone-slide.pos--2,
-      .phone-slide.pos-2 { display: none; }
-      .phone-slide.pos--1 { transform: translate(calc(-50% - 170px), -50%) scale(.55); }
-      .phone-slide.pos-1 { transform: translate(calc(-50% + 170px), -50%) scale(.55); }
-    }
-
-    @media (max-width: 640px) {
-      .stage { min-height: 680px; }
-      .top-pill { padding: 18px 24px; }
-      .phone-slide.active { width: 230px; height: 460px; }
-      .phone-slide.pos--1,
-      .phone-slide.pos-1 { opacity: .22; }
-      .reserve { width: 100%; padding-inline: 24px; }
-    }
-  </style>
+/* INFOS */
+.pills{
+  margin-top:20px;
+}
+.pill{
+  display:inline-block;
+  margin:5px;
+  padding:8px 14px;
+  background:rgba(255,255,255,.1);
+  border-radius:20px;
+  font-size:12px;
+}
+</style>
 </head>
+
 <body>
-  <main class="hero">
-    <section class="carousel">
-      <aside class="panel details-card">
-        <h3>Détails acheteur</h3>
-        <div class="detail-row"><span>État esthétique</span><strong id="detail-state">Très bon état</strong></div>
-        <div class="detail-row"><span>Batterie</span><strong id="detail-battery">89%</strong></div>
-        <div class="detail-row"><span>Garantie</span><strong id="detail-warranty">6 mois</strong></div>
-        <div class="detail-row"><span>Déblocage</span><strong>Tout opérateur</strong></div>
-      </aside>
 
-      <section class="stage">
-        <div class="top-pill">Faites réparer votre appareil</div>
+<div class="px">
 
-        <button class="arrow left" aria-label="Précédent" onclick="moveCarousel(-1)">‹</button>
-        <button class="arrow right" aria-label="Suivant" onclick="moveCarousel(1)">›</button>
+  <div class="stage" id="stage"></div>
 
-        <div class="phones-track" id="phonesTrack"></div>
+  <h1 id="title">iPhone 17 Pro</h1>
+  <div class="sub" id="subtitle">Bleu intense • 256 Go</div>
 
-        <div class="headline">
-          <div class="status">Disponible · réparation signalée</div>
-          <h1 id="product-title">iPhone 14 Pro</h1>
-          <p class="subtitle" id="product-subtitle">Violet intense · 128 Go · Très bon état</p>
-          <p class="desc" id="product-desc">Un excellent compromis pour profiter d’un écran fluide, d’un très bon module photo et d’un appareil contrôlé avant mise en vente.</p>
-          <button class="reserve">Réserver ce modèle</button>
-          <div class="hint">Clique sur le téléphone pour voir la face ou le dos</div>
+  <button class="btn">Réserver ce modèle</button>
 
-          <div class="info-pills" id="infoPills"></div>
+  <div class="pills" id="pills"></div>
+
+</div>
+
+<script>
+const products = [
+  {
+    title:"iPhone 17 Pro",
+    subtitle:"Bleu intense • 256 Go",
+    pills:["256 Go","Batterie 96%","ProMotion","Garantie"],
+    front:"face.png",
+    back:"dos.png"
+  },
+  {
+    title:"iPhone 17",
+    subtitle:"Lavande • 128 Go",
+    pills:["128 Go","Neuf","A19","Dual Cam"]
+  },
+  {
+    title:"Samsung S25",
+    subtitle:"Noir • 256 Go",
+    pills:["256 Go","AMOLED","Snapdragon"]
+  }
+];
+
+let index = 0;
+const stage = document.getElementById("stage");
+
+function render(){
+  stage.innerHTML="";
+  
+  products.forEach((p,i)=>{
+    const div=document.createElement("div");
+    div.className="slide";
+
+    if(i===index) div.classList.add("active");
+    else if(i===index-1) div.classList.add("left");
+    else if(i===index+1) div.classList.add("right");
+
+    div.innerHTML=`
+      <div class="duo">
+        <div class="phone">
+          ${p.front ? `<img src="${p.front}">` : `<div style="width:150px;height:300px;background:#222;border-radius:20px"></div>`}
         </div>
-      </section>
+        <div class="phone">
+          ${p.back ? `<img src="${p.back}">` : ``}
+        </div>
+      </div>
+    `;
 
-      <aside class="panel price-card">
-        <div class="label">Prix PhoneXpress</div>
-        <div class="price" id="product-price">579€</div>
-        <p>Contrôlé, nettoyé, testé et prêt à partir. Paiement possible à la livraison selon disponibilité.</p>
-        <div class="stock"><span class="dot"></span><span id="stock-text">2 pièces disponibles</span></div>
-      </aside>
-    </section>
-  </main>
-
-  <script>
-    /*
-      Pour remplacer les téléphones générés par tes vraies photos :
-      - ajoute frontImg: "photo-face.png"
-      - ajoute backImg: "photo-dos.png"
-      dans un objet du tableau products.
-    */
-
-    const products = [
-      {
-        title: "iPhone 14 Pro",
-        color: "Violet intense",
-        storage: "128 Go",
-        state: "Très bon état",
-        battery: "89%",
-        warranty: "6 mois",
-        price: "579€",
-        stock: "2 pièces disponibles",
-        year: "2022 année",
-        camera: "Triple caméra",
-        screen: "Écran remplacé par pièce premium",
-        checked: "Écran testé",
-        gradient: ["#6f5d88", "#4c3d65"],
-        accent: "#9b7cff"
-      },
-      {
-        title: "iPhone 13",
-        color: "Bleu nuit",
-        storage: "128 Go",
-        state: "Bon état",
-        battery: "91%",
-        warranty: "6 mois",
-        price: "399€",
-        stock: "4 pièces disponibles",
-        year: "2021 année",
-        camera: "Double caméra",
-        screen: "Écran original",
-        checked: "Face ID testé",
-        gradient: ["#1d4f80", "#0c1b32"],
-        accent: "#6aa8ff"
-      },
-      {
-        title: "Samsung S23",
-        color: "Crème",
-        storage: "256 Go",
-        state: "Excellent état",
-        battery: "95%",
-        warranty: "12 mois",
-        price: "529€",
-        stock: "1 pièce disponible",
-        year: "2023 année",
-        camera: "Triple caméra",
-        screen: "AMOLED testé",
-        checked: "Charge rapide testée",
-        gradient: ["#eee4d0", "#b9aa90"],
-        accent: "#f2d28c"
-      },
-      {
-        title: "Google Pixel 8",
-        color: "Noir volcanique",
-        storage: "128 Go",
-        state: "Très bon état",
-        battery: "93%",
-        warranty: "6 mois",
-        price: "489€",
-        stock: "3 pièces disponibles",
-        year: "2023 année",
-        camera: "Double caméra IA",
-        screen: "OLED testé",
-        checked: "Appareil photo testé",
-        gradient: ["#20242b", "#07090d"],
-        accent: "#88a2ff"
-      },
-      {
-        title: "iPhone 12 Pro",
-        color: "Graphite",
-        storage: "256 Go",
-        state: "Bon état",
-        battery: "87%",
-        warranty: "6 mois",
-        price: "429€",
-        stock: "2 pièces disponibles",
-        year: "2020 année",
-        camera: "Triple caméra",
-        screen: "Écran testé",
-        checked: "Batterie contrôlée",
-        gradient: ["#777b82", "#292c31"],
-        accent: "#b8c2d4"
-      }
-    ];
-
-    let activeIndex = 0;
-
-    const track = document.getElementById("phonesTrack");
-    const title = document.getElementById("product-title");
-    const subtitle = document.getElementById("product-subtitle");
-    const desc = document.getElementById("product-desc");
-    const price = document.getElementById("product-price");
-    const stockText = document.getElementById("stock-text");
-    const detailState = document.getElementById("detail-state");
-    const detailBattery = document.getElementById("detail-battery");
-    const detailWarranty = document.getElementById("detail-warranty");
-    const infoPills = document.getElementById("infoPills");
-
-    function phoneSvg(product, side = "back") {
-      const [c1, c2] = product.gradient;
-      const accent = product.accent;
-      const isBack = side === "back";
-
-      return `
-        <svg class="phone-svg" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="body-${product.title}-${side}" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stop-color="${c1}"/>
-              <stop offset="100%" stop-color="${c2}"/>
-            </linearGradient>
-            <radialGradient id="shine-${product.title}-${side}" cx="35%" cy="15%" r="70%">
-              <stop offset="0%" stop-color="rgba(255,255,255,.55)"/>
-              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-            </radialGradient>
-          </defs>
-          <rect x="18" y="8" width="244" height="524" rx="42" fill="#050914"/>
-          <rect x="25" y="16" width="230" height="508" rx="36" fill="url(#body-${product.title}-${side})"/>
-          <rect x="25" y="16" width="230" height="508" rx="36" fill="url(#shine-${product.title}-${side})" opacity=".28"/>
-          ${isBack ? `
-            <rect x="45" y="38" width="88" height="88" rx="25" fill="rgba(255,255,255,.13)"/>
-            <circle cx="70" cy="64" r="20" fill="#061126" stroke="${accent}" stroke-width="4"/>
-            <circle cx="105" cy="64" r="20" fill="#061126" stroke="${accent}" stroke-width="4"/>
-            <circle cx="70" cy="101" r="20" fill="#061126" stroke="${accent}" stroke-width="4"/>
-            <circle cx="108" cy="101" r="8" fill="#fff7d6"/>
-            <circle cx="140" cy="270" r="18" fill="rgba(255,255,255,.18)"/>
-          ` : `
-            <rect x="36" y="28" width="208" height="484" rx="30" fill="#050914"/>
-            <rect x="46" y="48" width="188" height="444" rx="24" fill="rgba(47,150,207,.28)"/>
-            <rect x="93" y="38" width="94" height="24" rx="12" fill="#050914"/>
-            <circle cx="140" cy="245" r="62" fill="rgba(255,255,255,.12)"/>
-            <text x="140" y="252" text-anchor="middle" font-size="18" font-weight="800" fill="white">${product.title.split(' ')[0]}</text>
-          `}
-        </svg>
-      `;
-    }
-
-    function render() {
-      track.innerHTML = "";
-
-      products.forEach((product, index) => {
-        const offset = index - activeIndex;
-        const normalized = ((offset + products.length + Math.floor(products.length / 2)) % products.length) - Math.floor(products.length / 2);
-
-        const slide = document.createElement("div");
-        slide.className = "phone-slide";
-
-        if (normalized === 0) slide.classList.add("active");
-        else if (normalized === -1) slide.classList.add("pos--1");
-        else if (normalized === -2) slide.classList.add("pos--2");
-        else if (normalized === 1) slide.classList.add("pos-1");
-        else if (normalized === 2) slide.classList.add("pos-2");
-        else slide.style.display = "none";
-
-        slide.innerHTML = `
-          <div class="phone-card">
-            <div class="phone-face front">
-              ${product.frontImg ? `<img src="${product.frontImg}" alt="${product.title} face">` : phoneSvg(product, "front")}
-            </div>
-            <div class="phone-face back">
-              ${product.backImg ? `<img src="${product.backImg}" alt="${product.title} dos">` : phoneSvg(product, "back")}
-            </div>
-          </div>
-        `;
-
-        slide.addEventListener("click", () => {
-          if (index !== activeIndex) {
-            activeIndex = index;
-            render();
-            return;
-          }
-          slide.classList.toggle("flipped");
-        });
-
-        track.appendChild(slide);
-      });
-
-      const p = products[activeIndex];
-      title.textContent = p.title;
-      subtitle.textContent = `${p.color} · ${p.storage} · ${p.state}`;
-      desc.textContent = "Un excellent compromis pour profiter d’un écran fluide, d’un très bon module photo et d’un appareil contrôlé avant mise en vente.";
-      price.textContent = p.price;
-      stockText.textContent = p.stock;
-      detailState.textContent = p.state;
-      detailBattery.textContent = p.battery;
-      detailWarranty.textContent = p.warranty;
-
-      infoPills.innerHTML = `
-        <span class="pill">${p.color}</span>
-        <span class="pill">${p.year}</span>
-        <span class="pill">${p.storage} stockage</span>
-        <span class="pill">${p.screen}</span>
-        <span class="pill">${p.camera}</span>
-        <span class="pill">${p.checked}</span>
-        <span class="pill">Garantie incluse</span>
-        <span class="pill">Batterie ${p.battery}</span>
-      `;
-    }
-
-    function moveCarousel(direction) {
-      activeIndex = (activeIndex + direction + products.length) % products.length;
+    div.onclick=()=>{
+      index=i;
       render();
     }
 
-    render();
-  </script>
+    stage.appendChild(div);
+  });
+
+  const p=products[index];
+  document.getElementById("title").innerText=p.title;
+  document.getElementById("subtitle").innerText=p.subtitle;
+  
+  document.getElementById("pills").innerHTML =
+    p.pills.map(x=>`<span class="pill">${x}</span>`).join("");
+}
+
+render();
+</script>
+
 </body>
 </html>
