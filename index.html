@@ -1,689 +1,277 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PhoneXpress Premium Carousel</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhoneXpress | Catalogue Premium</title>
 
-<style>
-:root{
-  --white:#f7fbff;
-  --muted:rgba(247,251,255,.72);
-  --panel:rgba(8,14,28,.76);
-  --panel-soft:rgba(8,14,28,.48);
-  --line:rgba(190,215,255,.22);
-  --green:#42f3a0;
-}
+    <style>
+        :root {
+            --white: #f7fbff;
+            --muted: rgba(247, 251, 255, .7);
+            --panel: rgba(8, 14, 28, .8);
+            --line: rgba(190, 215, 255, .15);
+            --green: #42f3a0;
+            --accent: #83aaff; /* Dynamique via JS */
+            --transition: 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
 
-*{box-sizing:border-box}
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #020712;
+            color: var(--white);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:transparent;
-  color:var(--white);
-  overflow-x:hidden;
-}
+        .px-showcase {
+            position: relative;
+            width: 100%;
+            max-width: 1250px;
+            margin: auto;
+            padding: 40px 20px;
+        }
 
-.px-showcase{
-  position:relative;
-  width:100%;
-  max-width:1220px;
-  min-height:720px;
-  margin:auto;
-  padding:24px 24px 34px;
-  background:transparent;
-  isolation:isolate;
-}
+        /* Aura dynamique derrière le téléphone actif */
+        .px-showcase::before {
+            content: "";
+            position: absolute;
+            top: 15%; left: 50%;
+            width: 600px; height: 450px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, var(--accent), transparent 70%);
+            opacity: 0.2;
+            filter: blur(60px);
+            z-index: -1;
+            transition: background var(--transition);
+        }
 
-.px-showcase::before{
-  content:"";
-  position:absolute;
-  top:92px;
-  left:50%;
-  width:620px;
-  height:520px;
-  transform:translateX(-50%);
-  background:radial-gradient(circle,rgba(255,255,255,.42),rgba(125,170,255,.28) 24%,rgba(32,68,130,.14) 48%,transparent 72%);
-  filter:blur(44px);
-  z-index:-1;
-  animation:aura 5s ease-in-out infinite alternate;
-}
+        .device-stage {
+            position: relative;
+            height: 400px;
+            perspective: 2000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-@keyframes aura{
-  from{opacity:.68;transform:translateX(-50%) scale(.96)}
-  to{opacity:1;transform:translateX(-50%) scale(1.05)}
-}
+        /* --- Logique des Slides --- */
+        .device-slide {
+            position: absolute;
+            width: 180px;
+            height: 360px;
+            transition: all var(--transition), opacity 0.6s ease, filter 0.8s ease;
+            cursor: pointer;
+            user-select: none;
+            will-change: transform, opacity;
+        }
 
-.device-stage{
-  position:relative;
-  height:365px;
-  perspective:1800px;
-  overflow:visible;
-}
+        /* Positions */
+        .device-slide { opacity: 0; transform: translateZ(-500px); pointer-events: none; }
+        
+        .device-slide[data-pos="0"] { /* Active */
+            opacity: 1; z-index: 10; pointer-events: auto;
+            width: 440px; transform: translateZ(200px);
+        }
+        .device-slide[data-pos="-1"] { opacity: 0.4; z-index: 5; transform: translateX(-320px) rotateY(45deg) scale(0.8); filter: blur(2px); }
+        .device-slide[data-pos="1"] { opacity: 0.4; z-index: 5; transform: translateX(320px) rotateY(-45deg) scale(0.8); filter: blur(2px); }
+        .device-slide[data-pos="-2"] { opacity: 0.1; z-index: 2; transform: translateX(-550px) rotateY(60deg) scale(0.6); filter: blur(6px); }
+        .device-slide[data-pos="2"] { opacity: 0.1; z-index: 2; transform: translateX(550px) rotateY(-60deg) scale(0.6); filter: blur(6px); }
 
-.device-slide{
-  position:absolute;
-  top:32px;
-  left:50%;
-  width:160px;
-  height:320px;
-  opacity:0;
-  transform-style:preserve-3d;
-  cursor:pointer;
-  filter:blur(8px) brightness(.55) saturate(.75);
-  transition:transform 1.15s cubic-bezier(.19,1,.22,1),opacity .9s ease,filter 1s ease;
-  will-change:transform,opacity,filter;
-}
+        .duo { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
+        .phone { position: absolute; transition: var(--transition); filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5)); }
+        
+        .device-slide[data-pos="0"] .phone.front { transform: translateX(45px) rotateY(-10deg); }
+        .device-slide[data-pos="0"] .phone.back { transform: translateX(215px) rotateY(15deg); opacity: 1; }
+        .device-slide:not([data-pos="0"]) .phone.back { opacity: 0; }
+        .device-slide:not([data-pos="0"]) .phone.front { transform: translateX(0); }
 
-.device-slide.active{
-  width:430px;
-  height:330px;
-  opacity:1;
-  z-index:10;
-  filter:blur(0) brightness(1.08) saturate(1.08);
-  transform:translateX(-50%) translateZ(210px) scale(1);
-}
+        .phone img, .phone svg { width: 160px; height: auto; display: block; }
 
-.device-slide.near-left{
-  z-index:5;
-  opacity:.42;
-  filter:blur(3px) brightness(.74);
-  transform:translateX(calc(-50% - 285px)) translateY(28px) rotateY(44deg) rotateZ(-2deg) translateZ(-120px) scale(.72);
-}
+        /* --- Navigation --- */
+        .nav-arrow {
+            position: absolute; top: 180px; z-index: 30;
+            width: 54px; height: 54px; border-radius: 50%;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+            color: white; backdrop-filter: blur(10px); cursor: pointer;
+            transition: 0.3s; font-size: 24px;
+        }
+        .nav-arrow:hover { background: var(--accent); border-color: white; color: #000; transform: scale(1.1); }
+        .nav-arrow.prev { left: 5%; }
+        .nav-arrow.next { right: 5%; }
 
-.device-slide.near-right{
-  z-index:5;
-  opacity:.42;
-  filter:blur(3px) brightness(.74);
-  transform:translateX(calc(-50% + 285px)) translateY(28px) rotateY(-44deg) rotateZ(2deg) translateZ(-120px) scale(.72);
-}
+        /* --- Grille de contenu --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 30px; margin-top: 20px; align-items: start;
+        }
 
-.device-slide.far-left{
-  z-index:2;
-  opacity:.18;
-  filter:blur(6px) brightness(.5);
-  transform:translateX(calc(-50% - 470px)) translateY(58px) rotateY(58deg) rotateZ(-4deg) translateZ(-260px) scale(.52);
-}
+        .glass-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+        }
 
-.device-slide.far-right{
-  z-index:2;
-  opacity:.18;
-  filter:blur(6px) brightness(.5);
-  transform:translateX(calc(-50% + 470px)) translateY(58px) rotateY(-58deg) rotateZ(4deg) translateZ(-260px) scale(.52);
-}
+        .main-copy { text-align: center; }
+        h1 { font-size: 3.5rem; margin: 0; letter-spacing: -2px; }
+        .price { font-size: 3rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
 
-.duo{
-  position:relative;
-  width:100%;
-  height:100%;
-  transform-style:preserve-3d;
-  animation:floatApple 5s ease-in-out infinite;
-}
+        .pill-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
+        .pill { padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.05); font-size: 0.8rem; border: 1px solid var(--line); }
 
-.device-slide.active .duo{
-  animation:floatApple 5s ease-in-out infinite,focusPop .7s cubic-bezier(.19,1,.22,1);
-}
+        .btn-buy {
+            background: var(--white); color: #000; border: none;
+            padding: 16px 40px; border-radius: 40px; font-weight: 700;
+            cursor: pointer; transition: 0.3s; margin-top: 20px;
+        }
+        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--accent); }
 
-@keyframes floatApple{
-  0%,100%{transform:translateY(0) rotateX(0deg)}
-  50%{transform:translateY(-12px) rotateX(2.5deg)}
-}
-
-@keyframes focusPop{
-  0%{transform:translateY(22px) scale(.93);filter:brightness(.75)}
-  100%{transform:translateY(0) scale(1);filter:brightness(1)}
-}
-
-.device-slide.active .duo::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:440px;
-  height:330px;
-  transform:translate(-50%,-45%);
-  background:radial-gradient(circle,rgba(255,255,255,.34),rgba(120,168,255,.22) 32%,transparent 70%);
-  filter:blur(34px);
-  z-index:-1;
-}
-
-.phone{
-  position:absolute;
-  top:0;
-  width:158px;
-  height:316px;
-  filter:drop-shadow(0 34px 40px rgba(0,0,0,.58));
-  transform-style:preserve-3d;
-}
-
-.phone.front{
-  left:42px;
-  transform:rotateY(-9deg) rotateZ(-1deg);
-}
-
-.phone.back{
-  right:42px;
-  transform:rotateY(12deg) rotateZ(1deg);
-}
-
-.device-slide:not(.active) .phone.front{
-  left:0;
-}
-
-.device-slide:not(.active) .phone.back{
-  display:none;
-}
-
-.phone img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
-
-.phone-svg{
-  width:100%;
-  height:100%;
-  display:block;
-  overflow:visible;
-}
-
-.nav-arrow{
-  position:absolute;
-  top:176px;
-  z-index:20;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.28);
-  background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));
-  color:white;
-  backdrop-filter:blur(14px);
-  display:grid;
-  place-items:center;
-  font-size:34px;
-  cursor:pointer;
-  box-shadow:0 20px 45px rgba(0,0,0,.25),inset 0 0 18px rgba(255,255,255,.08);
-  transition:.28s ease;
-}
-
-.nav-arrow:hover{
-  transform:scale(1.1);
-  box-shadow:0 24px 55px rgba(0,0,0,.34),0 0 30px rgba(122,167,255,.42);
-}
-
-.nav-arrow.prev{left:270px}
-.nav-arrow.next{right:270px}
-
-.content-grid{
-  display:grid;
-  grid-template-columns:255px minmax(430px,1fr) 255px;
-  align-items:end;
-  gap:28px;
-  margin-top:-8px;
-}
-
-.glass-card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:24px;
-  backdrop-filter:blur(18px);
-  box-shadow:0 26px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.08);
-}
-
-.details-card,.price-card{padding:22px}
-
-.details-card h3,.price-label{
-  margin:0 0 16px;
-  font-size:14px;
-  font-weight:900;
-}
-
-.detail-row{
-  display:flex;
-  justify-content:space-between;
-  gap:14px;
-  padding:12px 0;
-  border-top:1px solid rgba(255,255,255,.10);
-  font-size:13px;
-}
-
-.detail-row span{color:var(--muted)}
-.detail-row strong{text-align:right}
-
-.main-copy{text-align:center}
-
-h1{
-  margin:0;
-  font-size:clamp(44px,6vw,74px);
-  line-height:.9;
-  letter-spacing:-.07em;
-  text-shadow:0 0 25px rgba(255,255,255,.25),0 18px 45px rgba(0,0,0,.42);
-}
-
-.subtitle{
-  margin:12px 0 10px;
-  font-size:clamp(20px,2.2vw,28px);
-  font-weight:900;
-  color:rgba(247,251,255,.94);
-}
-
-.desc{
-  max-width:570px;
-  margin:0 auto 22px;
-  font-size:14px;
-  line-height:1.45;
-  color:rgba(247,251,255,.68);
-}
-
-.reserve{
-  border:1px solid rgba(190,220,255,.85);
-  border-radius:999px;
-  padding:17px 58px;
-  color:white;
-  background:linear-gradient(180deg,rgba(12,24,45,.95),rgba(2,7,18,.98));
-  font-size:17px;
-  font-weight:950;
-  cursor:pointer;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 24px 48px rgba(0,0,0,.30),0 0 34px rgba(122,167,255,.30);
-  transition:.28s ease;
-}
-
-.reserve:hover{
-  transform:translateY(-2px) scale(1.035);
-  box-shadow:0 30px 68px rgba(0,0,0,.40),0 0 48px rgba(122,167,255,.46);
-}
-
-.price{
-  margin:8px 0 16px;
-  font-size:43px;
-  font-weight:950;
-  text-shadow:0 0 22px rgba(122,167,255,.32);
-}
-
-.price-card p{
-  margin:0 0 18px;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.45;
-}
-
-.stock{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 14px;
-  border-radius:999px;
-  color:var(--green);
-  border:1px solid rgba(66,243,160,.46);
-  background:rgba(66,243,160,.08);
-  font-size:13px;
-  font-weight:900;
-}
-
-.stock::before{
-  content:"";
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:currentColor;
-  box-shadow:0 0 15px currentColor;
-}
-
-.pills{
-  grid-column:1/-1;
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:22px;
-}
-
-.pill{
-  padding:10px 16px;
-  border-radius:999px;
-  background:var(--panel-soft);
-  border:1px solid rgba(180,210,255,.18);
-  backdrop-filter:blur(14px);
-  color:rgba(247,251,255,.82);
-  font-size:12px;
-  font-weight:800;
-}
-
-@media(max-width:1050px){
-  .px-showcase{min-height:900px}
-  .content-grid{
-    grid-template-columns:1fr;
-    max-width:620px;
-    margin-inline:auto;
-  }
-  .details-card{order:2}
-  .main-copy{order:1}
-  .price-card{order:3}
-  .pills{order:4}
-  .nav-arrow.prev{left:18%}
-  .nav-arrow.next{right:18%}
-}
-
-@media(max-width:680px){
-  .px-showcase{padding-inline:12px;min-height:820px}
-  .device-stage{height:320px}
-  .device-slide.active{width:310px;height:270px}
-  .phone{width:122px;height:244px}
-  .phone.front{left:24px}
-  .phone.back{right:24px}
-  .device-slide.near-left{
-    transform:translateX(calc(-50% - 150px)) translateY(20px) rotateY(34deg) scale(.62);
-  }
-  .device-slide.near-right{
-    transform:translateX(calc(-50% + 150px)) translateY(20px) rotateY(-34deg) scale(.62);
-  }
-  .device-slide.far-left,
-  .device-slide.far-right{display:none}
-  .nav-arrow{top:148px;width:42px;height:42px}
-  .nav-arrow.prev{left:8px}
-  .nav-arrow.next{right:8px}
-  .reserve{width:100%;padding-inline:22px}
-}
-</style>
+        @media (max-width: 1000px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .device-slide[data-pos="0"] { width: 320px; }
+            .nav-arrow { top: 120px; }
+        }
+    </style>
 </head>
-
 <body>
 
-<section class="px-showcase">
+<section class="px-showcase" id="mainShowcase" aria-roledescription="carousel">
+    <div class="device-stage" id="stage"></div>
 
-  <div class="device-stage" id="deviceStage"></div>
+    <button class="nav-arrow prev" aria-label="Précédent" onclick="move(-1)">‹</button>
+    <button class="nav-arrow next" aria-label="Suivant" onclick="move(1)">›</button>
 
-  <button class="nav-arrow prev" type="button" onclick="moveProduct(-1)">‹</button>
-  <button class="nav-arrow next" type="button" onclick="moveProduct(1)">›</button>
+    <div class="content-grid" aria-live="polite">
+        <aside class="glass-card">
+            <h3 style="font-size:0.9rem; text-transform:uppercase; opacity:0.6">Fiche Technique</h3>
+            <div id="tech-details"></div>
+        </aside>
 
-  <div class="content-grid">
+        <main class="main-copy">
+            <h1 id="title">--</h1>
+            <div class="price" id="price">--€</div>
+            <p id="desc" style="opacity:0.7; line-height:1.6"></p>
+            <button class="btn-buy">Réserver maintenant</button>
+        </main>
 
-    <aside class="glass-card details-card">
-      <h3>Détails acheteur</h3>
-      <div class="detail-row"><span>État esthétique</span><strong id="stateText"></strong></div>
-      <div class="detail-row"><span>Batterie</span><strong id="batteryText"></strong></div>
-      <div class="detail-row"><span>Garantie</span><strong id="warrantyText"></strong></div>
-      <div class="detail-row"><span>Déblocage</span><strong>Tout opérateur</strong></div>
-    </aside>
-
-    <main class="main-copy">
-      <h1 id="titleText"></h1>
-      <div class="subtitle" id="subtitleText"></div>
-      <p class="desc" id="descText"></p>
-      <button class="reserve" type="button">Réserver ce modèle</button>
-    </main>
-
-    <aside class="glass-card price-card">
-      <div class="price-label">Prix PhoneXpress</div>
-      <div class="price" id="priceText"></div>
-      <p>Contrôlé, nettoyé, testé et prêt à partir. Paiement possible à la livraison selon disponibilité.</p>
-      <div class="stock" id="stockText"></div>
-    </aside>
-
-    <div class="pills" id="pills"></div>
-
-  </div>
-
+        <aside class="glass-card">
+            <h3 style="font-size:0.9rem; text-transform:uppercase; opacity:0.6">Disponibilité</h3>
+            <div id="stock-status" style="margin: 15px 0"></div>
+            <div class="pill-box" id="pills"></div>
+        </aside>
+    </div>
 </section>
 
 <script>
-const products=[
-  {
-    title:"iPhone 17 Pro",
-    color:"Bleu intense",
-    storage:"256 Go",
-    state:"Très bon état",
-    battery:"96%",
-    warranty:"12 mois",
-    price:"899€",
-    stock:"2 pièces disponibles",
-    camera:"Triple caméra Pro",
-    screen:"ProMotion 120 Hz",
-    chip:"A19 Pro",
-    finish:["#24415f","#07111f"],
-    accent:"#83aaff",
-    brand:"apple",
-    shape:"island",
-    cameraCount:3,
-    frontImg:"iphone17-face.png",
-    backImg:"iphone17-dos.png"
-  },
-  {
-    title:"iPhone 16 Pro",
-    color:"Titane naturel",
-    storage:"256 Go",
-    state:"Très bon état",
-    battery:"95%",
-    warranty:"12 mois",
-    price:"799€",
-    stock:"3 pièces disponibles",
-    camera:"Triple caméra Pro",
-    screen:"ProMotion 120 Hz",
-    chip:"A18 Pro",
-    finish:["#c3beb3","#4f4b45"],
-    accent:"#d8d2c4",
-    brand:"apple",
-    shape:"island",
-    cameraCount:3,
-    frontImg:"iphone16-face.png",
-    backImg:"iphone16-dos.png"
-  },
-  {
-    title:"iPhone 15 Pro",
-    color:"Titane bleu",
-    storage:"128 Go",
-    state:"Très bon état",
-    battery:"93%",
-    warranty:"6 mois",
-    price:"699€",
-    stock:"2 pièces disponibles",
-    camera:"Triple caméra Pro",
-    screen:"OLED 120 Hz",
-    chip:"A17 Pro",
-    finish:["#384b63","#101925"],
-    accent:"#86a9d7",
-    brand:"apple",
-    shape:"island",
-    cameraCount:3,
-    frontImg:"iphone15-face.png",
-    backImg:"iphone15-dos.png"
-  },
-  {
-    title:"iPhone 14 Pro",
-    color:"Violet intense",
-    storage:"128 Go",
-    state:"Très bon état",
-    battery:"89%",
-    warranty:"6 mois",
-    price:"579€",
-    stock:"2 pièces disponibles",
-    camera:"Triple caméra",
-    screen:"OLED 120 Hz",
-    chip:"A16",
-    finish:["#6f5d88","#322947"],
-    accent:"#b79cff",
-    brand:"apple",
-    shape:"island",
-    cameraCount:3,
-    frontImg:"iphone14-face.png",
-    backImg:"iphone14-dos.png"
-  },
-  {
-    title:"iPhone 13",
-    color:"Bleu",
-    storage:"128 Go",
-    state:"Bon état",
-    battery:"87%",
-    warranty:"6 mois",
-    price:"449€",
-    stock:"4 pièces disponibles",
-    camera:"Double caméra",
-    screen:"OLED",
-    chip:"A15",
-    finish:["#2f78b7","#10263d"],
-    accent:"#7bbcff",
-    brand:"apple",
-    shape:"notch",
-    cameraCount:2,
-    frontImg:"iphone13-face.png",
-    backImg:"iphone13-dos.png"
-  }
+const products = [
+    { id: 1, title: "iPhone 17 Pro", price: "1299€", accent: "#83aaff", battery: "100%", storage: "256GB", stock: "En stock", chip: "A19 Pro", desc: "La nouvelle frontière de la puissance mobile avec puce photonique." },
+    { id: 2, title: "iPhone 16 Pro", price: "989€", accent: "#d8d2c4", battery: "96%", storage: "256GB", stock: "3 restants", chip: "A18 Pro", desc: "Le titane naturel allié à une polyvalence photographique pro." },
+    { id: 3, title: "iPhone 15 Pro", price: "749€", accent: "#4b617a", battery: "92%", storage: "128GB", stock: "En stock", chip: "A17 Pro", desc: "Légèreté et performance avec le premier châssis titane." },
+    { id: 4, title: "iPhone 14 Pro", price: "599€", accent: "#6f5d88", battery: "88%", storage: "128GB", stock: "Dernière pièce", chip: "A16", desc: "L'arrivée de la Dynamic Island pour une interface réinventée." },
+    { id: 5, title: "iPhone 13", price: "429€", accent: "#2f78b7", battery: "89%", storage: "128GB", stock: "En stock", chip: "A15", desc: "Un classique indémodable avec une autonomie exceptionnelle." }
 ];
 
-let activeIndex=0;
-let autoTimer;
+let currentIndex = 0;
+let autoPlay = setInterval(() => move(1), 5000);
 
-const stage=document.getElementById("deviceStage");
-const titleText=document.getElementById("titleText");
-const subtitleText=document.getElementById("subtitleText");
-const descText=document.getElementById("descText");
-const stateText=document.getElementById("stateText");
-const batteryText=document.getElementById("batteryText");
-const warrantyText=document.getElementById("warrantyText");
-const priceText=document.getElementById("priceText");
-const stockText=document.getElementById("stockText");
-const pills=document.getElementById("pills");
+const stage = document.getElementById('stage');
+const showcase = document.getElementById('mainShowcase');
 
-function svgPhone(p,side){
-  const id=p.title.replace(/[^a-zA-Z0-9]/g,"")+side;
-  const c1=p.finish[0];
-  const c2=p.finish[1];
-  const isBack=side==="back";
-
-  let cameras="";
-  const positions=[[72,70],[112,70],[72,112],[112,112]];
-
-  for(let i=0;i<p.cameraCount;i++){
-    const x=positions[i][0];
-    const y=positions[i][1];
-    cameras+=`
-      <circle cx="${x}" cy="${y}" r="18" fill="#06101f" stroke="rgba(255,255,255,.42)" stroke-width="3"/>
-      <circle cx="${x-4}" cy="${y-5}" r="6" fill="rgba(120,170,255,.7)"/>
-    `;
-  }
-
-  const notch=p.shape==="island"
-    ? `<rect x="98" y="29" width="84" height="25" rx="13" fill="#020712"/>`
-    : `<rect x="78" y="28" width="124" height="26" rx="13" fill="#020712"/>`;
-
-  return `
-  <svg class="phone-svg" viewBox="0 0 280 560" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="body-${id}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${c1}"/>
-        <stop offset="100%" stop-color="${c2}"/>
-      </linearGradient>
-      <radialGradient id="shine-${id}" cx="34%" cy="15%" r="78%">
-        <stop offset="0%" stop-color="rgba(255,255,255,.55)"/>
-        <stop offset="42%" stop-color="rgba(255,255,255,.10)"/>
-        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-      </radialGradient>
-      <linearGradient id="screen-${id}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${p.accent}"/>
-        <stop offset="42%" stop-color="#17072c"/>
-        <stop offset="72%" stop-color="#020712"/>
-        <stop offset="100%" stop-color="#dff2ff"/>
-      </linearGradient>
-    </defs>
-
-    <rect x="16" y="6" width="248" height="548" rx="46" fill="#030712"/>
-    <rect x="26" y="17" width="228" height="526" rx="38" fill="url(#body-${id})"/>
-    <rect x="26" y="17" width="228" height="526" rx="38" fill="url(#shine-${id})" opacity=".4"/>
-
-    ${
-      isBack
-      ? `
-        <rect x="44" y="42" width="112" height="112" rx="31" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.15)"/>
-        ${cameras}
-        <circle cx="126" cy="112" r="8" fill="#fff2bd"/>
-        <text x="140" y="302" text-anchor="middle" fill="rgba(0,0,0,.34)" font-size="42" font-weight="900">●</text>
-      `
-      : `
-        <rect x="36" y="28" width="208" height="504" rx="32" fill="#020712"/>
-        <rect x="45" y="42" width="190" height="476" rx="27" fill="url(#screen-${id})"/>
-        ${notch}
-        <circle cx="140" cy="198" r="74" fill="rgba(255,255,255,.08)"/>
-        <circle cx="140" cy="380" r="82" fill="rgba(255,255,255,.11)"/>
-      `
-    }
-  </svg>`;
+// Initialisation du DOM permanent
+function init() {
+    products.forEach((p, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'device-slide';
+        slide.dataset.index = i;
+        slide.innerHTML = `
+            <div class="duo">
+                <div class="phone front">${getPlaceholderSVG(p.accent, 'FRONT')}</div>
+                <div class="phone back">${getPlaceholderSVG(p.accent, 'BACK')}</div>
+            </div>
+        `;
+        slide.onclick = () => { currentIndex = i; update(); };
+        stage.appendChild(slide);
+    });
+    update();
 }
 
-function render(){
-  stage.innerHTML="";
-
-  products.forEach((p,i)=>{
-    const offset=((i-activeIndex+products.length+3)%products.length)-3;
-    const slide=document.createElement("div");
-    slide.className="device-slide";
-
-    if(offset===0) slide.classList.add("active");
-    else if(offset===-1) slide.classList.add("near-left");
-    else if(offset===1) slide.classList.add("near-right");
-    else if(offset===-2) slide.classList.add("far-left");
-    else if(offset===2) slide.classList.add("far-right");
-    else slide.style.display="none";
-
-    slide.innerHTML=`
-      <div class="duo">
-        <div class="phone front">
-          ${p.frontImg ? `<img src="${p.frontImg}" alt="${p.title} face">` : svgPhone(p,"front")}
-        </div>
-        <div class="phone back">
-          ${p.backImg ? `<img src="${p.backImg}" alt="${p.title} dos">` : svgPhone(p,"back")}
-        </div>
-      </div>
-    `;
-
-    slide.addEventListener("click",()=>{
-      if(i!==activeIndex){
-        activeIndex=i;
-        render();
-        restartAuto();
-      }
+function update() {
+    // 1. Positionnement des slides
+    document.querySelectorAll('.device-slide').forEach((slide, i) => {
+        let offset = i - currentIndex;
+        // Gérer la boucle infinie pour le positionnement
+        if (offset > 2) offset -= products.length;
+        if (offset < -2) offset += products.length;
+        slide.dataset.pos = offset;
     });
 
-    stage.appendChild(slide);
-  });
+    // 2. Mise à jour des textes
+    const p = products[currentIndex];
+    document.getElementById('title').textContent = p.title;
+    document.getElementById('price').textContent = p.price;
+    document.getElementById('desc').textContent = p.desc;
+    document.body.style.setProperty('--accent', p.accent);
 
-  const p=products[activeIndex];
+    // 3. Mise à jour des détails
+    document.getElementById('tech-details').innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin:10px 0; border-bottom:1px solid var(--line); padding-bottom:5px">
+            <span>Batterie</span> <b>${p.battery}</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:10px 0">
+            <span>Processeur</span> <b>${p.chip}</b>
+        </div>
+    `;
 
-  titleText.textContent=p.title;
-  subtitleText.textContent=`${p.color} · ${p.storage} · ${p.state}`;
-  descText.textContent="Un modèle premium contrôlé, nettoyé et testé avant mise en vente. Design moderne, écran fluide et très haut niveau photo.";
-  stateText.textContent=p.state;
-  batteryText.textContent=p.battery;
-  warrantyText.textContent=p.warranty;
-  priceText.textContent=p.price;
-  stockText.textContent=p.stock;
+    document.getElementById('stock-status').innerHTML = `
+        <span style="color:var(--green)">●</span> ${p.stock}
+    `;
 
-  pills.innerHTML=`
-    <span class="pill">${p.color}</span>
-    <span class="pill">${p.storage} stockage</span>
-    <span class="pill">${p.screen}</span>
-    <span class="pill">${p.camera}</span>
-    <span class="pill">${p.chip}</span>
-    <span class="pill">Batterie ${p.battery}</span>
-    <span class="pill">Garantie ${p.warranty}</span>
-  `;
+    document.getElementById('pills').innerHTML = `
+        <span class="pill">${p.storage}</span>
+        <span class="pill">Garantie 12 mois</span>
+    `;
 }
 
-function moveProduct(direction){
-  activeIndex=(activeIndex+direction+products.length)%products.length;
-  render();
-  restartAuto();
+function move(dir) {
+    currentIndex = (currentIndex + dir + products.length) % products.length;
+    update();
+    resetAutoPlay();
 }
 
-function restartAuto(){
-  clearInterval(autoTimer);
-  autoTimer=setInterval(()=>moveProduct(1),5200);
+// Support Tactile (Swipe)
+let touchStart = 0;
+showcase.addEventListener('touchstart', e => touchStart = e.touches[0].clientX);
+showcase.addEventListener('touchend', e => {
+    const touchEnd = e.changedTouches[0].clientX;
+    if (touchStart - touchEnd > 50) move(1);
+    if (touchStart - touchEnd < -50) move(-1);
+});
+
+// Gestion AutoPlay
+showcase.onmouseenter = () => clearInterval(autoPlay);
+showcase.onmouseleave = () => resetAutoPlay();
+
+function resetAutoPlay() {
+    clearInterval(autoPlay);
+    autoPlay = setInterval(() => move(1), 5000);
 }
 
-render();
-restartAuto();
+// Fonction utilitaire pour générer des placeholders SVG propres (remplaçables par <img>)
+function getPlaceholderSVG(color, label) {
+    return `
+    <svg viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+        <rect width="160" height="320" rx="24" fill="#080e1c" stroke="rgba(255,255,255,0.1)"/>
+        <rect x="5" y="5" width="150" height="310" rx="20" fill="${color}" opacity="0.15"/>
+        <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12" opacity="0.5">${label}</text>
+    </svg>`;
+}
+
+init();
 </script>
-
 </body>
 </html>
