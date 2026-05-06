@@ -1,1223 +1,686 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PhoneXpress Premium</title>
-  <style>
-    :root {
-      --white: #f7fbff;
-      --muted: rgba(247, 251, 255, 0.72);
-      --muted-soft: rgba(247, 251, 255, 0.52);
-      --nav-text: #5d6675;
-      --blue-900: #06385f;
-      --blue-800: #0b4e7c;
-      --blue-700: #106ea5;
-      --blue-600: #198fcf;
-      --blue-500: #2aa8e8;
-      --panel: rgba(7, 48, 78, 0.78);
-      --panel-strong: rgba(5, 35, 61, 0.92);
-      --line: rgba(255, 255, 255, 0.16);
-      --line-strong: rgba(255, 255, 255, 0.28);
-      --accent: #8fb6ff;
-      --accent-dark: #00142b;
-      --success: #50f0a6;
-      --shadow: 0 28px 70px rgba(0, 28, 54, 0.28);
-      --ease: cubic-bezier(0.19, 1, 0.22, 1);
-      --speed: 760ms;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--white);
-      background: transparent;
-      overflow-x: hidden;
-    }
-
-    button,
-    a {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      padding: 0;
-      color: inherit;
-      background: transparent;
-    }
-
-    .showcase {
-      position: relative;
-      width: min(100%, 1240px);
-      margin-inline: auto;
-      padding: clamp(22px, 4vw, 50px) clamp(16px, 3vw, 24px) clamp(42px, 5vw, 70px);
-      isolation: isolate;
-    }
-
-    .stage-wrap {
-      position: relative;
-      min-height: clamp(330px, 42vw, 470px);
-      perspective: 1800px;
-    }
-
-    .device-stage {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform-style: preserve-3d;
-    }
-
-    .device-slide {
-      position: absolute;
-      display: grid;
-      width: min(54vw, 430px);
-      height: min(40vw, 360px);
-      min-height: 300px;
-      place-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateZ(-420px) scale(0.72);
-      transform-style: preserve-3d;
-      filter: blur(7px) saturate(0.6);
-      cursor: pointer;
-      transition:
-        transform var(--speed) var(--ease),
-        opacity 420ms ease,
-        filter var(--speed) ease;
-      will-change: transform, opacity, filter;
-    }
-
-    .device-slide[data-pos="0"] {
-      z-index: 12;
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateZ(110px) scale(1);
-      filter: none;
-    }
-
-    .device-slide[data-pos="-1"] {
-      z-index: 5;
-      opacity: 0.26;
-      pointer-events: auto;
-      transform: translate3d(clamp(-360px, -28vw, -230px), 14px, -130px) rotateY(42deg) scale(0.78);
-      filter: blur(3px) saturate(0.62);
-    }
-
-    .device-slide[data-pos="1"] {
-      z-index: 5;
-      opacity: 0.26;
-      pointer-events: auto;
-      transform: translate3d(clamp(230px, 28vw, 360px), 14px, -130px) rotateY(-42deg) scale(0.78);
-      filter: blur(3px) saturate(0.62);
-    }
-
-    .device-slide[data-pos="-2"] {
-      z-index: 2;
-      opacity: 0.08;
-      transform: translate3d(clamp(-520px, -40vw, -310px), 20px, -250px) rotateY(55deg) scale(0.62);
-    }
-
-    .device-slide[data-pos="2"] {
-      z-index: 2;
-      opacity: 0.08;
-      transform: translate3d(clamp(310px, 40vw, 520px), 20px, -250px) rotateY(-55deg) scale(0.62);
-    }
-
-    .device-duo {
-      position: relative;
-      width: 360px;
-      height: 340px;
-      transform-style: preserve-3d;
-    }
-
-    .phone-shot {
-      position: absolute;
-      top: 18px;
-      display: grid;
-      width: 156px;
-      height: 316px;
-      place-items: center;
-      transform-style: preserve-3d;
-      transition:
-        opacity var(--speed) ease,
-        transform var(--speed) var(--ease);
-    }
-
-    .phone-shot.front {
-      left: 62px;
-      z-index: 4;
-      transform: translateZ(42px) rotateY(-10deg) rotateZ(-2deg);
-    }
-
-    .phone-shot.back {
-      left: 188px;
-      z-index: 3;
-      transform: translateY(8px) rotateY(14deg) rotateZ(3deg);
-    }
-
-    .device-slide:not([data-pos="0"]) .device-duo {
-      width: 168px;
-    }
-
-    .device-slide:not([data-pos="0"]) .phone-shot.front {
-      left: 6px;
-      transform: rotateY(0deg);
-    }
-
-    .device-slide:not([data-pos="0"]) .phone-shot.back {
-      opacity: 0;
-      transform: translateX(70px) rotateY(28deg);
-    }
-
-    .phone-shot img {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 22px 32px rgba(0, 24, 44, 0.38));
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-
-    .phone-shot:not(.has-image) .phone-fallback {
-      display: grid;
-    }
-
-    .phone-shot.has-image .phone-fallback {
-      display: none;
-    }
-
-    .phone-fallback {
-      position: relative;
-      width: 138px;
-      height: 282px;
-      overflow: hidden;
-      border: 2px solid rgba(255, 255, 255, 0.26);
-      border-radius: 29px;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.16), transparent 30%),
-        linear-gradient(145deg, var(--finish-1), var(--finish-2));
-      box-shadow:
-        inset 0 0 0 7px rgba(0, 0, 0, 0.26),
-        0 22px 38px rgba(0, 24, 44, 0.26);
-    }
-
-    .phone-shot.front .phone-fallback::before {
-      content: "";
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      width: 48px;
-      height: 15px;
-      border-radius: 999px;
-      background: #05070a;
-      transform: translateX(-50%);
-    }
-
-    .phone-shot.front .phone-fallback::after {
-      content: "";
-      position: absolute;
-      inset: 18px 13px 13px;
-      border-radius: 22px;
-      background:
-        radial-gradient(circle at 55% 30%, color-mix(in srgb, var(--accent) 72%, white), transparent 24%),
-        linear-gradient(145deg, #f7fbff, color-mix(in srgb, var(--accent) 36%, #dbe9ff) 42%, #203a66);
-      opacity: 0.96;
-    }
-
-    .phone-shot.back .phone-fallback::before {
-      content: "";
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      width: 62px;
-      height: 62px;
-      border-radius: 20px;
-      background:
-        radial-gradient(circle at 28% 28%, #05080c 0 9px, transparent 10px),
-        radial-gradient(circle at 70% 34%, #05080c 0 9px, transparent 10px),
-        radial-gradient(circle at 43% 72%, #05080c 0 9px, transparent 10px),
-        color-mix(in srgb, var(--finish-1) 70%, white 10%);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
-    }
-
-    .phone-shot.back .phone-fallback::after {
-      content: "PX";
-      position: absolute;
-      left: 50%;
-      top: 52%;
-      width: 46px;
-      height: 46px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      color: rgba(255, 255, 255, 0.54);
-      background: rgba(255, 255, 255, 0.08);
-      font-size: 0.82rem;
-      font-weight: 900;
-      transform: translate(-50%, -50%);
-    }
-
-    .stage-control {
-      position: absolute;
-      top: 50%;
-      z-index: 30;
-      display: grid;
-      width: 54px;
-      height: 54px;
-      place-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 50%;
-      color: rgba(255, 255, 255, 0.9);
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 14px 34px rgba(0, 34, 64, 0.16);
-      backdrop-filter: blur(12px);
-      cursor: pointer;
-      transform: translateY(-50%);
-      transition:
-        background 180ms ease,
-        border-color 180ms ease,
-        color 180ms ease,
-        transform 180ms ease;
-    }
-
-    .stage-control:hover,
-    .stage-control:focus-visible {
-      border-color: rgba(255, 255, 255, 0.38);
-      color: var(--accent-dark);
-      background: rgba(255, 255, 255, 0.9);
-      outline: 0;
-      transform: translateY(-50%) scale(1.06);
-    }
-
-    .stage-control svg {
-      width: 22px;
-      height: 22px;
-      stroke-width: 2.5;
-    }
-
-    .stage-control.prev {
-      left: clamp(8px, 8vw, 110px);
-    }
-
-    .stage-control.next {
-      right: clamp(8px, 8vw, 110px);
-    }
-
-    .content-zone {
-      display: grid;
-      grid-template-columns: minmax(230px, 280px) minmax(340px, 1fr) minmax(230px, 280px);
-      align-items: center;
-      gap: clamp(18px, 3vw, 34px);
-      margin-top: clamp(8px, 2vw, 22px);
-    }
-
-    .info-card {
-      min-height: 145px;
-      padding: 22px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .panel-kicker {
-      margin: 0 0 14px;
-      color: rgba(247, 251, 255, 0.62);
-      font-size: 0.76rem;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
-
-    .spec-list,
-    .pickup-list {
-      display: grid;
-      gap: 11px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .spec-row,
-    .pickup-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      min-width: 0;
-      padding-bottom: 11px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.11);
-      color: rgba(247, 251, 255, 0.82);
-      font-size: 0.95rem;
-      font-weight: 650;
-    }
-
-    .spec-row:last-child,
-    .pickup-row:last-child {
-      border-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .spec-row strong,
-    .pickup-row strong {
-      color: var(--white);
-      font-weight: 900;
-      text-align: right;
-      overflow-wrap: anywhere;
-    }
-
-    .pickup-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pickup-status::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      flex: 0 0 auto;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 0 5px rgba(80, 240, 166, 0.12);
-    }
-
-    .main-copy {
-      min-width: 0;
-      text-align: center;
-    }
-
-    .hero-title {
-      margin: 0;
-      color: #fff;
-      font-size: clamp(2.35rem, 5vw, 4.5rem);
-      font-weight: 850;
-      line-height: 0.95;
-      letter-spacing: 0;
-      text-wrap: balance;
-      text-shadow: 0 12px 26px rgba(0, 43, 76, 0.22);
-    }
-
-    .price {
-      margin-top: 14px;
-      color: var(--accent);
-      font-size: clamp(2rem, 4.2vw, 3.45rem);
-      font-weight: 950;
-      line-height: 1;
-      text-shadow: 0 16px 26px rgba(0, 43, 76, 0.18);
-    }
-
-    .description {
-      max-width: 630px;
-      margin: 22px auto 0;
-      color: rgba(247, 251, 255, 0.76);
-      font-size: clamp(0.98rem, 1.35vw, 1.08rem);
-      font-weight: 620;
-      line-height: 1.65;
-      text-wrap: pretty;
-    }
-
-    .pills {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      max-width: 620px;
-      margin: 24px auto 0;
-    }
-
-    .pill {
-      display: inline-flex;
-      min-height: 34px;
-      align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 999px;
-      padding: 0 16px;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.24);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-      font-size: 0.84rem;
-      font-weight: 850;
-      backdrop-filter: blur(12px);
-    }
-
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 30px;
-    }
-
-    .button {
-      position: relative;
-      display: inline-flex;
-      min-height: 58px;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border-radius: 999px;
-      padding: 0 26px;
-      text-decoration: none;
-      white-space: nowrap;
-      font-size: 0.98rem;
-      font-weight: 900;
-      cursor: pointer;
-      transition:
-        transform 180ms ease,
-        background 180ms ease,
-        border-color 180ms ease,
-        color 180ms ease,
-        box-shadow 180ms ease;
-    }
-
-    .button:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.82);
-      outline-offset: 4px;
-    }
-
-    .button-primary {
-      min-width: min(100%, 330px);
-      color: #dfeaff;
-      background: linear-gradient(180deg, #07142d, #020817);
-      border: 1px solid rgba(143, 182, 255, 0.32);
-      box-shadow:
-        inset 0 0 18px rgba(143, 182, 255, 0.18),
-        0 18px 46px rgba(0, 23, 50, 0.32);
-    }
-
-    .button-primary::after {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      border-radius: inherit;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      pointer-events: none;
-    }
-
-    .button-secondary {
-      min-width: 180px;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(12px);
-    }
-
-    .button:hover {
-      transform: translateY(-2px);
-    }
-
-    .button svg,
-    .icon-button svg,
-    .phone-link svg {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2.3;
-    }
-
-    .product-rail {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      width: min(100%, 980px);
-      margin: 34px auto 0;
-    }
-
-    .rail-item {
-      display: grid;
-      grid-template-columns: 26px 1fr;
-      gap: 12px;
-      align-items: center;
-      min-width: 0;
-      padding: 13px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
-      color: rgba(247, 251, 255, 0.76);
-      background: rgba(4, 44, 75, 0.38);
-      text-align: left;
-      cursor: pointer;
-      backdrop-filter: blur(14px);
-      transition:
-        background 180ms ease,
-        border-color 180ms ease,
-        color 180ms ease,
-        transform 180ms ease;
-    }
-
-    .rail-item:hover,
-    .rail-item:focus-visible {
-      border-color: rgba(255, 255, 255, 0.26);
-      color: #fff;
-      background: rgba(5, 60, 96, 0.58);
-      outline: 0;
-      transform: translateY(-1px);
-    }
-
-    .rail-item[aria-selected="true"] {
-      border-color: color-mix(in srgb, var(--accent) 62%, white 20%);
-      color: #fff;
-      background: color-mix(in srgb, var(--accent) 18%, rgba(5, 50, 82, 0.76));
-    }
-
-    .swatch {
-      width: 26px;
-      height: 26px;
-      border: 1px solid rgba(255, 255, 255, 0.36);
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--finish-1), var(--finish-2));
-      box-shadow: inset 0 0 0 4px rgba(0, 38, 68, 0.18);
-    }
-
-    .rail-title,
-    .rail-meta {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .rail-title {
-      color: inherit;
-      font-size: 0.9rem;
-      font-weight: 900;
-    }
-
-    .rail-meta {
-      margin-top: 2px;
-      color: rgba(247, 251, 255, 0.58);
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    .compare-dialog {
-      width: min(900px, calc(100vw - 28px));
-      max-height: min(720px, calc(100vh - 28px));
-      padding: 0;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      border-radius: 8px;
-      color: var(--white);
-      background: #06385f;
-      box-shadow: 0 34px 110px rgba(0, 19, 39, 0.62);
-      overflow: hidden;
-    }
-
-    .compare-dialog::backdrop {
-      background: rgba(0, 26, 52, 0.64);
-      backdrop-filter: blur(10px);
-    }
-
-    .compare-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 22px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .compare-head h2 {
-      margin: 4px 0 0;
-      font-size: clamp(1.45rem, 3vw, 2.3rem);
-      line-height: 1;
-      letter-spacing: 0;
-    }
-
-    .close-button {
-      display: grid;
-      flex: 0 0 auto;
-      width: 42px;
-      height: 42px;
-      place-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 50%;
-      color: var(--white);
-      background: rgba(255, 255, 255, 0.08);
-      cursor: pointer;
-    }
-
-    .close-button:hover,
-    .close-button:focus-visible {
-      color: var(--accent-dark);
-      background: #fff;
-      outline: 0;
-    }
-
-    .close-button svg {
-      width: 19px;
-      height: 19px;
-      stroke-width: 2.4;
-    }
-
-    .compare-table-wrap {
-      overflow: auto;
-      max-height: calc(min(720px, 100vh - 28px) - 95px);
-    }
-
-    .compare-table {
-      width: 100%;
-      min-width: 720px;
-      border-collapse: collapse;
-    }
-
-    .compare-table th,
-    .compare-table td {
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .compare-table th {
-      color: rgba(247, 251, 255, 0.58);
-      font-size: 0.74rem;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .compare-table td {
-      color: rgba(247, 251, 255, 0.76);
-      font-size: 0.92rem;
-      font-weight: 700;
-    }
-
-    .compare-table strong {
-      display: block;
-      color: var(--white);
-      font-size: 1rem;
-    }
-
-    .compare-price {
-      color: var(--accent);
-      font-weight: 950;
-    }
-
-    .fade-swap {
-      animation: fadeSwap 420ms ease both;
-    }
-
-    @keyframes fadeSwap {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 1060px) {
-      .content-zone {
-        grid-template-columns: 1fr;
-        max-width: 720px;
-        margin-inline: auto;
-      }
-
-      .info-card:first-child {
-        order: 2;
-      }
-
-      .main-copy {
-        order: 1;
-      }
-
-      .info-card:last-child {
-        order: 3;
-      }
-
-      .spec-list,
-      .pickup-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .spec-row,
-      .pickup-row {
-        border-bottom: 0;
-        padding-bottom: 0;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .showcase {
-        padding-inline: 12px;
-      }
-
-      .stage-wrap {
-        min-height: 350px;
-      }
-
-      .device-slide {
-        width: 310px;
-        height: 330px;
-        min-height: 0;
-      }
-
-      .device-duo {
-        width: 300px;
-        height: 315px;
-      }
-
-      .phone-shot {
-        width: 128px;
-        height: 268px;
-      }
-
-      .phone-shot.front {
-        left: 44px;
-      }
-
-      .phone-shot.back {
-        left: 146px;
-      }
-
-      .phone-fallback {
-        width: 116px;
-        height: 238px;
-        border-radius: 24px;
-      }
-
-      .device-slide[data-pos="-1"],
-      .device-slide[data-pos="1"],
-      .device-slide[data-pos="-2"],
-      .device-slide[data-pos="2"] {
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      .stage-control {
-        top: auto;
-        bottom: 0;
-        width: 44px;
-        height: 44px;
-        transform: none;
-      }
-
-      .stage-control:hover,
-      .stage-control:focus-visible {
-        transform: scale(1.05);
-      }
-
-      .stage-control.prev {
-        left: calc(50% - 58px);
-      }
-
-      .stage-control.next {
-        right: calc(50% - 58px);
-      }
-
-      .spec-list,
-      .pickup-list {
-        grid-template-columns: 1fr;
-      }
-
-      .button,
-      .button-primary,
-      .button-secondary {
-        width: 100%;
-      }
-
-      .product-rail {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 460px) {
-      .product-rail {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 1ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 1ms !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhoneXpress – Vente de Smartphones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #3a9eff;
+  --blue-light: #7ec4ff;
+  --blue-pale: #b8dbff;
+  --panel: rgba(180,215,255,0.10);
+  --panel-strong: rgba(160,205,255,0.16);
+  --border: rgba(120,185,255,0.18);
+  --border-accent: rgba(100,175,255,0.32);
+  --white: #eef6ff;
+  --muted: rgba(180,215,255,0.60);
+  --success: #3dffa0;
+  --warn: #ffb443;
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --ease: cubic-bezier(0.22,1,0.36,1);
+  --speed: 580ms;
+}
+
+html, body {
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── GLASS CARD avec canvas particles intégré ─── */
+.glass-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+}
+.glass-card canvas {
+  position: absolute;
+  inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+.glass-card > *:not(canvas) { position: relative; z-index: 1; }
+
+.card-label {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--blue-light); margin-bottom: 14px;
+}
+
+.spec-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(120,185,255,0.12);
+  font-size: 0.84rem; color: var(--muted);
+}
+.spec-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.spec-row strong { color: var(--white); font-weight: 600; }
+
+/* ─── SHOWCASE ─── */
+.showcase-wrap {
+  position: relative; z-index: 1;
+  padding: clamp(32px,5vw,60px) clamp(16px,4vw,48px) clamp(40px,6vw,70px);
+  max-width: 1280px; margin: 0 auto;
+}
+
+.stage {
+  position: relative;
+  height: clamp(340px,40vw,480px);
+  perspective: 1600px;
+  margin-bottom: 32px;
+  overflow: visible;
+}
+
+.slide {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: clamp(220px,28vw,320px);
+  display: flex; flex-direction: column; align-items: center;
+  opacity: 0; pointer-events: none;
+  transition: all var(--speed) var(--ease);
+  will-change: transform, opacity;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  background: none; border: none;
+  transform: translate(-50%,-50%);
+}
+.slide[data-p="0"] {
+  opacity: 1; pointer-events: auto; z-index: 10;
+  transform: translate(-50%,-50%) translateZ(80px) scale(1);
+  filter: none;
+}
+.slide[data-p="-1"] {
+  opacity: 0.42; pointer-events: auto; z-index: 5;
+  transform: translate(calc(-50% - clamp(200px,22vw,295px)),-50%) translateZ(-60px) rotateY(32deg) scale(0.82);
+  filter: brightness(0.65) saturate(0.5);
+}
+.slide[data-p="1"] {
+  opacity: 0.42; pointer-events: auto; z-index: 5;
+  transform: translate(calc(-50% + clamp(200px,22vw,295px)),-50%) translateZ(-60px) rotateY(-32deg) scale(0.82);
+  filter: brightness(0.65) saturate(0.5);
+}
+.slide[data-p="-2"] {
+  opacity: 0.10; z-index: 2;
+  transform: translate(calc(-50% - clamp(330px,36vw,450px)),-50%) translateZ(-180px) rotateY(50deg) scale(0.62);
+  filter: brightness(0.35) saturate(0.3);
+}
+.slide[data-p="2"] {
+  opacity: 0.10; z-index: 2;
+  transform: translate(calc(-50% + clamp(330px,36vw,450px)),-50%) translateZ(-180px) rotateY(-50deg) scale(0.62);
+  filter: brightness(0.35) saturate(0.3);
+}
+
+/* ─── PHONE DUO ─── */
+.phone-duo {
+  position: relative;
+  width: 280px; height: 310px;
+  transform-style: preserve-3d;
+}
+.phone-slot {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--speed) var(--ease);
+}
+.phone-slot.front {
+  width: 142px; height: 284px;
+  left: 28px; top: 0; z-index: 4;
+  transform: rotateY(-8deg) rotateZ(-1.5deg) translateZ(30px);
+}
+.phone-slot.back {
+  width: 130px; height: 262px;
+  left: 128px; top: 18px; z-index: 3;
+  transform: rotateY(12deg) rotateZ(2deg);
+}
+.phone-slot img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 38px rgba(0,20,60,0.55));
+  user-select: none; -webkit-user-drag: none;
+  display: block; border-radius: 18px;
+}
+.phone-shell {
+  width: 100%; height: 100%;
+  border-radius: 26px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: linear-gradient(145deg, var(--ca), var(--cb));
+  position: relative; overflow: hidden;
+  box-shadow: inset 0 0 0 6px rgba(0,0,0,0.28), 0 24px 50px rgba(0,0,0,0.45);
+}
+.phone-shell::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, transparent 52%);
+}
+.front .phone-shell::before {
+  content: '';
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 44px; height: 13px; border-radius: 999px;
+  background: #060a10; z-index: 2;
+}
+.back .phone-shell::before {
+  content: '';
+  position: absolute; top: 14px; left: 14px;
+  width: 56px; height: 56px; border-radius: 16px;
+  background: rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); z-index: 2;
+}
+
+.slide:not([data-p="0"]) .phone-slot.back { opacity: 0; }
+.slide:not([data-p="0"]) .phone-duo { width: 130px; }
+.slide:not([data-p="0"]) .phone-slot.front { left: 0; transform: none; }
+
+/* ─── UPLOAD ZONE ─── */
+.upload-zone {
+  display: flex; gap: 8px;
+  margin-top: 14px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 280ms;
+}
+.slide[data-p="0"] .upload-zone { opacity: 1; pointer-events: auto; }
+.upload-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; border-radius: 999px;
+  border: 1px solid var(--border-accent);
+  background: rgba(58,158,255,0.10);
+  color: var(--blue-pale);
+  font-family: var(--font-body);
+  font-size: 0.71rem; font-weight: 600; letter-spacing: 0.03em;
+  cursor: pointer; transition: all 180ms;
+}
+.upload-btn:hover { background: rgba(58,158,255,0.22); border-color: var(--blue-light); color: #fff; }
+.upload-btn svg { width: 12px; height: 12px; stroke-width: 2.4; flex-shrink: 0; }
+.upload-btn input[type="file"] { display: none; }
+
+/* ─── CONTROLS ─── */
+.ctrl {
+  position: absolute; top: 48%; z-index: 20;
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border-accent);
+  border-radius: 50%;
+  background: var(--panel-strong);
+  color: var(--blue-pale);
+  cursor: pointer; backdrop-filter: blur(14px);
+  transform: translateY(-50%);
+  transition: all 180ms ease;
+}
+.ctrl:hover { border-color: var(--blue); background: rgba(58,158,255,0.22); color: #fff; transform: translateY(-50%) scale(1.07); }
+.ctrl svg { width: 20px; height: 20px; stroke-width: 2.4; }
+.ctrl.prev { left: clamp(0px,5vw,70px); }
+.ctrl.next { right: clamp(0px,5vw,70px); }
+
+/* ─── CONTENT ZONE ─── */
+.content-zone {
+  display: grid;
+  grid-template-columns: 230px 1fr 230px;
+  gap: 20px; align-items: start;
+  margin-bottom: 24px;
+}
+
+/* ─── MAIN COPY ─── */
+.main-copy { text-align: center; padding: 0 10px; animation: fadeUp 380ms var(--ease) both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.prod-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem,4.5vw,3.6rem);
+  font-weight: 700; letter-spacing: 0.02em;
+  text-transform: uppercase; line-height: 1; margin-bottom: 8px;
+}
+.prod-price {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem,3.8vw,3rem);
+  font-weight: 600; color: var(--blue-light); margin-bottom: 12px;
+}
+.prod-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.65; max-width: 440px; margin: 0 auto 16px; }
+.pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-bottom: 22px; }
+.pill {
+  font-size: 0.72rem; font-weight: 600; padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(100,175,255,0.24);
+  background: rgba(58,158,255,0.10);
+  color: var(--blue-light); letter-spacing: 0.02em;
+}
+.cta-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  height: 50px; padding: 0 24px;
+  border-radius: 999px; font-size: 0.88rem; font-weight: 600;
+  font-family: var(--font-body);
+  text-decoration: none; cursor: pointer;
+  transition: all 180ms ease; white-space: nowrap;
+  border: 1px solid transparent; letter-spacing: 0.03em;
+}
+.btn svg { width: 15px; height: 15px; stroke-width: 2.4; }
+.btn-primary {
+  background: linear-gradient(135deg, rgba(26,95,170,0.92), rgba(11,58,114,0.96));
+  color: #c8e0ff; border-color: rgba(100,175,255,0.3);
+  box-shadow: 0 10px 28px rgba(0,50,130,0.3), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,70,170,0.38); }
+.btn-ghost {
+  background: var(--panel); color: var(--white);
+  border-color: var(--border-accent); backdrop-filter: blur(8px);
+}
+.btn-ghost:hover { background: var(--panel-strong); transform: translateY(-2px); }
+
+.status-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 7px; flex-shrink: 0;
+}
+
+/* ─── RAIL ─── */
+.rail { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.rail-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  cursor: pointer; transition: all 180ms ease; text-align: left;
+}
+.rail-btn:hover { border-color: var(--border-accent); background: var(--panel-strong); }
+.rail-btn.active { border-color: rgba(100,175,255,0.5); background: rgba(58,158,255,0.15); }
+.rail-swatch {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.22);
+  background: linear-gradient(135deg, var(--sw-a), var(--sw-b));
+}
+.rail-name { font-size: 0.82rem; font-weight: 600; color: var(--white); display: block; }
+.rail-meta { font-size: 0.72rem; color: var(--muted); display: block; margin-top: 1px; }
+
+/* ─── DIALOG ─── */
+dialog {
+  width: min(940px,calc(100vw - 28px));
+  max-height: min(700px,calc(100vh - 28px));
+  padding: 0; border: 1px solid var(--border-accent);
+  border-radius: var(--radius);
+  background: rgba(8,18,38,0.97);
+  color: var(--white);
+  box-shadow: 0 40px 120px rgba(0,10,30,0.8);
+  overflow: hidden; backdrop-filter: blur(30px);
+}
+dialog::backdrop { background: rgba(0,8,24,0.68); backdrop-filter: blur(12px); }
+.dlg-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+}
+.dlg-head h2 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.dlg-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer; transition: all 180ms;
+}
+.dlg-close:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+.dlg-close svg { width: 15px; height: 15px; stroke-width: 2.4; }
+.dlg-body { overflow: auto; max-height: calc(min(700px,100vh - 28px) - 80px); }
+table { width: 100%; min-width: 680px; border-collapse: collapse; }
+th {
+  padding: 11px 18px; text-align: left;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: rgba(8,18,38,0.97);
+}
+td {
+  padding: 13px 18px; border-bottom: 1px solid rgba(120,185,255,0.07);
+  font-size: 0.87rem; color: var(--muted); vertical-align: top;
+}
+td strong { display: block; color: var(--white); font-weight: 600; font-size: 0.93rem; }
+.td-price { color: var(--blue-light); font-weight: 700; font-size: 1rem; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .content-zone { grid-template-columns: 1fr; }
+  .glass-card:first-child { order: 2; }
+  .main-copy { order: 1; }
+  .glass-card:last-child { order: 3; }
+}
+@media (max-width: 640px) {
+  .rail { grid-template-columns: 1fr 1fr; }
+  .ctrl.prev { left: 4px; } .ctrl.next { right: 4px; }
+  .slide[data-p="-1"],.slide[data-p="1"],.slide[data-p="-2"],.slide[data-p="2"] { opacity: 0; pointer-events: none; }
+}
+@media (max-width: 420px) { .rail { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+</style>
 </head>
 <body>
-  <main class="showcase" id="phoneXpressShowcase">
-    <section class="stage-wrap" aria-label="Showroom des smartphones PhoneXpress">
-      <div class="device-stage" id="deviceStage"></div>
 
-      <button class="stage-control prev" type="button" id="prevBtn" aria-label="Modèle précédent">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
+<section class="showcase-wrap">
+  <div class="stage" id="stage">
+    <button class="ctrl prev" id="prev" aria-label="Précédent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="ctrl next" id="next" aria-label="Suivant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
+  </div>
 
-      <button class="stage-control next" type="button" id="nextBtn" aria-label="Modèle suivant">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-          <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
-    </section>
-
-    <section class="content-zone" aria-live="polite">
-      <aside class="info-card" aria-label="Fiche technique">
-        <p class="panel-kicker">Fiche technique</p>
-        <ul class="spec-list" id="specList"></ul>
-      </aside>
-
-      <article class="main-copy" id="heroCopy">
-        <h1 class="hero-title" id="productTitle">PhoneXpress</h1>
-        <div class="price" id="productPrice">--€</div>
-        <p class="description" id="productDescription"></p>
-        <div class="pills" id="pillList"></div>
-
-        <div class="cta-row">
-          <a class="button button-primary" id="quoteLink" href="https://phonexpress.odoo.com/demande-de-devis" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            Réserver avec acompte
-          </a>
-          <button class="button button-secondary" type="button" id="compareBtn">Comparer</button>
-        </div>
-      </article>
-
-      <aside class="info-card" aria-label="Retrait boutique">
-        <p class="panel-kicker">Disponibilité</p>
-        <ul class="pickup-list" id="pickupList"></ul>
-      </aside>
-    </section>
-
-    <nav class="product-rail" id="productRail" role="tablist" aria-label="Choix rapide du modèle"></nav>
-  </main>
-
-  <dialog class="compare-dialog" id="compareDialog" aria-labelledby="compareTitle">
-    <div class="compare-head">
-      <div>
-        <p class="panel-kicker">Comparatif</p>
-        <h2 id="compareTitle">Choisir le bon modèle</h2>
+  <div class="content-zone">
+    <div class="glass-card">
+      <canvas id="cvSpec"></canvas>
+      <div class="card-label">Fiche technique</div>
+      <div id="specList"></div>
+    </div>
+    <div class="main-copy" id="mainCopy">
+      <div class="prod-name" id="prodName"></div>
+      <div class="prod-price" id="prodPrice"></div>
+      <p class="prod-desc" id="prodDesc"></p>
+      <div class="pills" id="pillList"></div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://phonexpress.odoo.com/demande-de-devis" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Réserver ce modèle au : 09.XX.XX.XX.XX
+        </a>
+        <button class="btn btn-ghost" id="compareBtn">Comparer les modèles</button>
       </div>
-      <button class="close-button" type="button" id="closeCompare" aria-label="Fermer le comparatif">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-          <path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" />
-        </svg>
-      </button>
     </div>
-    <div class="compare-table-wrap">
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th>Modèle</th>
-            <th>Prix</th>
-            <th>Batterie</th>
-            <th>Stockage</th>
-            <th>Garantie</th>
-            <th>Retrait</th>
-          </tr>
-        </thead>
-        <tbody id="compareBody"></tbody>
-      </table>
+    <div class="glass-card">
+      <canvas id="cvDispo"></canvas>
+      <div class="card-label">Disponibilité</div>
+      <div id="dispoList"></div>
     </div>
-  </dialog>
+  </div>
 
-  <script>
-    // Mets tes fichiers image dans le même dossier que ce HTML, puis change
-    // seulement frontImg et backImg ci-dessous. Exemple GitHub: iphone17-face.png.
-    const products = [
-      {
-        title: "iPhone 17 Pro",
-        price: "1299€",
-        accent: "#8fb6ff",
-        contrast: "#06142a",
-        finishA: "#264b78",
-        finishB: "#081c34",
-        battery: "100%",
-        storage: "256 Go",
-        chip: "A19 Pro",
-        color: "Bleu intense",
-        camera: "Triple caméra",
-        warranty: "12 mois",
-        stock: "En stock",
-        reservation: "Acompte possible",
-        pickup: "Retrait en boutique",
-        frontImg: "iphone17-face.png",
-        backImg: "iphone17-dos.png",
-        pills: ["Bleu intense", "256 Go stockage", "OLED 120 Hz", "A19 Pro", "Triple caméra", "12 mois"],
-        desc: "La nouvelle frontière de la puissance mobile, disponible en réservation boutique avec acompte."
-      },
-      {
-        title: "iPhone 16 Pro",
-        price: "989€",
-        accent: "#a8c5ff",
-        contrast: "#07111f",
-        finishA: "#b9c2ce",
-        finishB: "#687584",
-        battery: "96%",
-        storage: "256 Go",
-        chip: "A18 Pro",
-        color: "Titane naturel",
-        camera: "Triple caméra",
-        warranty: "12 mois",
-        stock: "3 restants",
-        reservation: "Acompte possible",
-        pickup: "Retrait en boutique",
-        frontImg: "iphone16-face.png",
-        backImg: "iphone16-dos.png",
-        pills: ["Titane naturel", "256 Go stockage", "120 Hz ProMotion", "A18 Pro", "Triple caméra", "12 mois"],
-        desc: "Un modèle Pro équilibré, puissant et élégant, à réserver puis récupérer directement en boutique."
-      },
-      {
-        title: "iPhone 15 Pro",
-        price: "749€",
-        accent: "#7fc3ff",
-        contrast: "#06182a",
-        finishA: "#41536c",
-        finishB: "#142235",
-        battery: "92%",
-        storage: "128 Go",
-        chip: "A17 Pro",
-        color: "Titane bleu",
-        camera: "Triple caméra",
-        warranty: "12 mois",
-        stock: "En stock",
-        reservation: "Acompte possible",
-        pickup: "Retrait en boutique",
-        frontImg: "iphone15-face.png",
-        backImg: "iphone15-dos.png",
-        pills: ["Titane bleu", "128 Go stockage", "OLED 120 Hz", "A17 Pro", "Triple caméra", "12 mois"],
-        desc: "Le châssis titane, la puissance Pro et un prix plus doux pour une excellente expérience premium."
-      },
-      {
-        title: "iPhone 14 Pro",
-        price: "599€",
-        accent: "#b5a4ff",
-        contrast: "#100c22",
-        finishA: "#7a6994",
-        finishB: "#352844",
-        battery: "88%",
-        storage: "128 Go",
-        chip: "A16 Bionic",
-        color: "Violet intense",
-        camera: "Triple caméra",
-        warranty: "6 mois",
-        stock: "Dernière pièce",
-        reservation: "Acompte conseillé",
-        pickup: "Retrait en boutique",
-        frontImg: "iphone14-face.png",
-        backImg: "iphone14-dos.png",
-        pills: ["Violet intense", "128 Go stockage", "OLED 120 Hz", "A16 Bionic", "Triple caméra", "6 mois"],
-        desc: "Dynamic Island, écran OLED et performances Pro dans une offre boutique très compétitive."
+  <div class="rail" id="rail"></div>
+</section>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg-head">
+    <div>
+      <div class="card-label" style="margin-bottom:4px">Comparatif modèles</div>
+      <h2 id="dlgTitle">Choisir le bon modèle</h2>
+    </div>
+    <button class="dlg-close" id="dlgClose" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="dlg-body">
+    <table>
+      <thead><tr><th>Modèle</th><th>Prix</th><th>Batterie</th><th>Puce</th><th>Stockage</th><th>Garantie</th><th>Retrait</th></tr></thead>
+      <tbody id="cmpBody"></tbody>
+    </table>
+  </div>
+</dialog>
+
+<script>
+/* ══════════════════════════════════════════════
+   DONNÉES PRODUITS
+   → Pour utiliser tes images depuis le disque :
+     mets le nom du fichier dans frontImg/backImg
+     (ex: "iphone17-face.png") et place les
+     images dans le même dossier que ce HTML.
+   → Pour uploader depuis le navigateur :
+     clique les boutons "Face / Dos" sous chaque
+     téléphone actif — l'image remplace le fallback.
+══════════════════════════════════════════════ */
+const products = [
+  {
+    name: "iPhone 17 Pro", price: "1 299€",
+    desc: "La nouvelle frontière de la puissance mobile. Puce A19 Pro, triple caméra et écran ProMotion 120 Hz dans un châssis titane.",
+    colorA: "#1a3c6e", colorB: "#0a1e3a", swA: "#2e6bb5", swB: "#112550",
+    battery: "100%", chip: "A19 Pro", storage: "256 Go", warranty: "12 mois",
+    stock: "En stock", reservation: "Acompte possible", pickup: "Retrait en boutique",
+    colorLabel: "Bleu intense",
+    pills: ["Bleu intense","256 Go","OLED 120 Hz","A19 Pro","Triple caméra","12 mois"],
+    frontImg: "", backImg: ""
+  },
+  {
+    name: "iPhone 16 Pro", price: "989€",
+    desc: "Performances Pro équilibrées, puce A18 Pro et châssis titane naturel. Le meilleur rapport puissance-finesse.",
+    colorA: "#7a8694", colorB: "#3d4a56", swA: "#a8b5c2", swB: "#546270",
+    battery: "96%", chip: "A18 Pro", storage: "256 Go", warranty: "12 mois",
+    stock: "3 restants", reservation: "Acompte possible", pickup: "Retrait en boutique",
+    colorLabel: "Titane naturel",
+    pills: ["Titane naturel","256 Go","120 Hz ProMotion","A18 Pro","Triple caméra","12 mois"],
+    frontImg: "", backImg: ""
+  },
+  {
+    name: "iPhone 15 Pro", price: "749€",
+    desc: "Le châssis titane, la puissance Pro et un prix plus accessible. Puce A17 Pro et triple caméra.",
+    colorA: "#2b3f5c", colorB: "#111d30", swA: "#4a6a96", swB: "#1c3050",
+    battery: "92%", chip: "A17 Pro", storage: "128 Go", warranty: "12 mois",
+    stock: "En stock", reservation: "Acompte possible", pickup: "Retrait en boutique",
+    colorLabel: "Titane bleu",
+    pills: ["Titane bleu","128 Go","OLED 120 Hz","A17 Pro","Triple caméra","12 mois"],
+    frontImg: "", backImg: ""
+  },
+  {
+    name: "iPhone 14 Pro", price: "599€",
+    desc: "Dynamic Island, écran OLED 120 Hz et puce A16 Bionic. Une offre Pro très compétitive avec garantie boutique.",
+    colorA: "#5c3e6e", colorB: "#2a1a36", swA: "#8a5aaa", swB: "#3c2254",
+    battery: "88%", chip: "A16 Bionic", storage: "128 Go", warranty: "6 mois",
+    stock: "Dernière pièce", reservation: "Acompte conseillé", pickup: "Retrait en boutique",
+    colorLabel: "Violet intense",
+    pills: ["Violet intense","128 Go","OLED 120 Hz","A16 Bionic","Triple caméra","6 mois"],
+    frontImg: "", backImg: ""
+  }
+];
+
+/* ─────────────────────────────────────────────────────
+   IMAGES EMBARQUÉES EN BASE64
+   Les images sont stockées directement dans le HTML —
+   elles ne sont jamais chargées depuis un serveur externe
+   et ne sont pas accessibles publiquement via une URL.
+
+   WORKFLOW POUR AJOUTER TES IMAGES :
+   1. Utilise l'outil "🖼 Intégrer mes images" en bas de page
+      (visible uniquement si ?edit est dans l'URL, ou toujours
+       si SHOW_EMBED_TOOL = true ci-dessous)
+   2. Sélectionne Face + Dos pour chaque modèle
+   3. Copie le code généré → colle-le dans frontImg / backImg
+──────────────────────────────────────────────────────── */
+const SHOW_EMBED_TOOL = true; /* passe à false pour masquer l'outil en prod */
+
+const uploaded = {}; /* images converties en session (non persistées) */
+
+/* ──────────────────────────────────────────
+   PARTICLES DANS LES CARDS
+────────────────────────────────────────── */
+function cardParticles(canvas) {
+  const ctx = canvas.getContext('2d');
+  let W, H, dots = [], raf;
+  function resize() {
+    const r = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width = r.width; H = canvas.height = r.height;
+  }
+  function mkDot() {
+    return { x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.3+0.3,
+      vx:(Math.random()-.5)*.18, vy:(Math.random()-.5)*.18,
+      a: Math.random()*.45+.15 };
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<dots.length;i++) for(let j=i+1;j<dots.length;j++) {
+      const dx=dots[i].x-dots[j].x, dy=dots[i].y-dots[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<85) {
+        ctx.beginPath(); ctx.moveTo(dots[i].x,dots[i].y); ctx.lineTo(dots[j].x,dots[j].y);
+        ctx.strokeStyle=`rgba(110,185,255,${.13*(1-d/85)})`; ctx.lineWidth=.5; ctx.stroke();
       }
-    ];
-
-    let currentIndex = 0;
-    let touchStartX = 0;
-
-    const root = document.documentElement;
-    const stage = document.getElementById("deviceStage");
-    const rail = document.getElementById("productRail");
-    const heroCopy = document.getElementById("heroCopy");
-    const title = document.getElementById("productTitle");
-    const price = document.getElementById("productPrice");
-    const description = document.getElementById("productDescription");
-    const specList = document.getElementById("specList");
-    const pickupList = document.getElementById("pickupList");
-    const pillList = document.getElementById("pillList");
-    const compareDialog = document.getElementById("compareDialog");
-    const compareBody = document.getElementById("compareBody");
-
-    function phoneSide(product, side) {
-      const image = side === "front" ? product.frontImg : product.backImg;
-      const label = side === "front" ? "face avant" : "dos";
-      const hasImage = Boolean(image);
-
-      return `
-        <div class="phone-shot ${side} ${hasImage ? "has-image" : ""}" style="--finish-1:${product.finishA}; --finish-2:${product.finishB}">
-          ${hasImage ? `
-            <img
-              src="${image}"
-              alt="${product.title} ${label}"
-              loading="lazy"
-              decoding="async"
-              draggable="false"
-              onerror="this.parentElement.classList.remove('has-image'); this.remove();"
-            />
-          ` : ""}
-          <div class="phone-fallback" aria-hidden="true"></div>
-        </div>
-      `;
     }
-
-    function createSlides() {
-      products.forEach((product, index) => {
-        const slide = document.createElement("button");
-        slide.type = "button";
-        slide.className = "device-slide";
-        slide.dataset.index = String(index);
-        slide.setAttribute("aria-label", `Voir ${product.title}`);
-        slide.innerHTML = `
-          <div class="device-duo" aria-hidden="true">
-            ${phoneSide(product, "front")}
-            ${phoneSide(product, "back")}
-          </div>
-        `;
-        slide.addEventListener("click", () => {
-          if (index !== currentIndex) {
-            currentIndex = index;
-            updateShowcase();
-          }
-        });
-        stage.appendChild(slide);
-      });
-    }
-
-    function createRail() {
-      products.forEach((product, index) => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "rail-item";
-        item.setAttribute("role", "tab");
-        item.setAttribute("aria-label", `${product.title}, ${product.price}`);
-        item.innerHTML = `
-          <span class="swatch" style="--finish-1:${product.finishA}; --finish-2:${product.finishB}" aria-hidden="true"></span>
-          <span>
-            <span class="rail-title">${product.title}</span>
-            <span class="rail-meta">${product.color} · ${product.price}</span>
-          </span>
-        `;
-        item.addEventListener("click", () => {
-          currentIndex = index;
-          updateShowcase();
-        });
-        rail.appendChild(item);
-      });
-    }
-
-    function createCompareTable() {
-      compareBody.innerHTML = products.map((product) => `
-        <tr>
-          <td><strong>${product.title}</strong>${product.color}</td>
-          <td><span class="compare-price">${product.price}</span></td>
-          <td>${product.battery}</td>
-          <td>${product.storage}</td>
-          <td>${product.warranty}</td>
-          <td>${product.pickup}</td>
-        </tr>
-      `).join("");
-    }
-
-    function normalizedOffset(index) {
-      const length = products.length;
-      let offset = index - currentIndex;
-      const half = Math.floor(length / 2);
-
-      if (offset > half) offset -= length;
-      if (offset < -half) offset += length;
-
-      return Math.max(-2, Math.min(2, offset));
-    }
-
-    function animateCopy() {
-      heroCopy.classList.remove("fade-swap");
-      void heroCopy.offsetWidth;
-      heroCopy.classList.add("fade-swap");
-    }
-
-    function updateShowcase() {
-      const product = products[currentIndex];
-      root.style.setProperty("--accent", product.accent);
-      root.style.setProperty("--accent-dark", product.contrast);
-
-      document.querySelectorAll(".device-slide").forEach((slide, index) => {
-        slide.dataset.pos = String(normalizedOffset(index));
-        slide.setAttribute("aria-current", index === currentIndex ? "true" : "false");
-      });
-
-      document.querySelectorAll(".rail-item").forEach((item, index) => {
-        item.setAttribute("aria-selected", index === currentIndex ? "true" : "false");
-      });
-
-      title.textContent = product.title;
-      price.textContent = product.price;
-      description.textContent = product.desc;
-
-      specList.innerHTML = [
-        ["Batterie", product.battery],
-        ["Processeur", product.chip],
-        ["Stockage", product.storage],
-        ["Garantie", product.warranty]
-      ].map(([label, value]) => `
-        <li class="spec-row">
-          <span>${label}</span>
-          <strong>${value}</strong>
-        </li>
-      `).join("");
-
-      pickupList.innerHTML = [
-        ["Stock", `<span class="pickup-status">${product.stock}</span>`],
-        ["Réservation", product.reservation],
-        ["Retrait", product.pickup]
-      ].map(([label, value]) => `
-        <li class="pickup-row">
-          <span>${label}</span>
-          <strong>${value}</strong>
-        </li>
-      `).join("");
-
-      pillList.innerHTML = product.pills.map((pill) => `<span class="pill">${pill}</span>`).join("");
-      animateCopy();
-    }
-
-    function move(direction) {
-      currentIndex = (currentIndex + direction + products.length) % products.length;
-      updateShowcase();
-    }
-
-    document.getElementById("prevBtn").addEventListener("click", () => move(-1));
-    document.getElementById("nextBtn").addEventListener("click", () => move(1));
-    document.getElementById("compareBtn").addEventListener("click", () => {
-      if (typeof compareDialog.showModal === "function") {
-        compareDialog.showModal();
-      } else {
-        compareDialog.setAttribute("open", "");
-      }
+    dots.forEach(d => {
+      ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(140,205,255,${d.a})`; ctx.fill();
+      d.x+=d.vx; d.y+=d.vy;
+      if(d.x<0||d.x>W) d.vx*=-1;
+      if(d.y<0||d.y>H) d.vy*=-1;
     });
-    document.getElementById("closeCompare").addEventListener("click", () => compareDialog.close());
-    compareDialog.addEventListener("click", (event) => {
-      if (event.target === compareDialog) {
-        compareDialog.close();
-      }
-    });
+    raf=requestAnimationFrame(draw);
+  }
+  function init() { resize(); dots=Array.from({length:28},mkDot); draw(); }
+  const ro=new ResizeObserver(()=>{cancelAnimationFrame(raf);init();});
+  ro.observe(canvas.parentElement); init();
+}
+cardParticles(document.getElementById('cvSpec'));
+cardParticles(document.getElementById('cvDispo'));
 
-    stage.addEventListener("touchstart", (event) => {
-      touchStartX = event.changedTouches[0].clientX;
-    }, { passive: true });
+/* ──────────────────────────────────────────
+   BUILD SLIDES
+────────────────────────────────────────── */
+let cur=0;
+const stage=document.getElementById('stage');
 
-    stage.addEventListener("touchend", (event) => {
-      const delta = event.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(delta) > 48) {
-        move(delta > 0 ? -1 : 1);
-      }
-    }, { passive: true });
+function makeSlot(p,i,side) {
+  const key=`${i}-${side}`;
+  const src=uploaded[key]||(side==='front'?p.frontImg:p.backImg);
+  const wrap=document.createElement('div');
+  wrap.className=`phone-slot ${side}`;
+  wrap.dataset.slot=key;
+  if(src) {
+    const img=document.createElement('img');
+    img.src=src; img.alt=`${p.name} ${side}`; img.draggable=false;
+    img.onerror=()=>{wrap.innerHTML=shellHtml(p);};
+    wrap.appendChild(img);
+  } else {
+    wrap.innerHTML=shellHtml(p);
+  }
+  return wrap;
+}
+function shellHtml(p) {
+  return `<div class="phone-shell" style="--ca:${p.colorA};--cb:${p.colorB}"></div>`;
+}
+function makeUploadBtn(i,side,label) {
+  const lbl=document.createElement('label');
+  lbl.className='upload-btn';
+  const icon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+  lbl.innerHTML=`${icon}${label}<input type="file" accept="image/*">`;
+  lbl.querySelector('input').addEventListener('change',function(){
+    const file=this.files[0]; if(!file) return;
+    const fr=new FileReader();
+    fr.onload=e=>{
+      const key=`${i}-${side}`;
+      uploaded[key]=e.target.result;
+      document.querySelectorAll(`.phone-slot[data-slot="${key}"]`).forEach(slot=>{
+        slot.innerHTML='';
+        const img=document.createElement('img');
+        img.src=e.target.result; img.alt=products[i].name; img.draggable=false;
+        slot.appendChild(img);
+      });
+    };
+    fr.readAsDataURL(file);
+  });
+  return lbl;
+}
 
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft") move(-1);
-      if (event.key === "ArrowRight") move(1);
-    });
+products.forEach((p,i)=>{
+  const slide=document.createElement('button');
+  slide.type='button'; slide.className='slide'; slide.dataset.index=i;
+  slide.setAttribute('aria-label',`Voir ${p.name}`);
 
-    createSlides();
-    createRail();
-    createCompareTable();
-    updateShowcase();
-  </script>
+  const duo=document.createElement('div');
+  duo.className='phone-duo';
+  duo.appendChild(makeSlot(p,i,'front'));
+  duo.appendChild(makeSlot(p,i,'back'));
+  slide.appendChild(duo);
+
+  slide.addEventListener('click',e=>{
+    if(i!==cur){cur=i;update();}
+  });
+  stage.appendChild(slide);
+});
+
+/* ──────────────────────────────────────────
+   RAIL
+────────────────────────────────────────── */
+const rail=document.getElementById('rail');
+products.forEach((p,i)=>{
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='rail-btn';
+  btn.innerHTML=`<span class="rail-swatch" style="--sw-a:${p.swA};--sw-b:${p.swB}"></span><span><span class="rail-name">${p.name}</span><span class="rail-meta">${p.colorLabel} · ${p.price}</span></span>`;
+  btn.addEventListener('click',()=>{cur=i;update();});
+  rail.appendChild(btn);
+});
+
+/* ──────────────────────────────────────────
+   COMPARE
+────────────────────────────────────────── */
+document.getElementById('cmpBody').innerHTML=products.map(p=>`
+  <tr>
+    <td><strong>${p.name}</strong>${p.colorLabel}</td>
+    <td><span class="td-price">${p.price}</span></td>
+    <td>${p.battery}</td><td>${p.chip}</td><td>${p.storage}</td>
+    <td>${p.warranty}</td><td>${p.pickup}</td>
+  </tr>`).join('');
+
+/* ──────────────────────────────────────────
+   UPDATE
+────────────────────────────────────────── */
+function offset(i){
+  let d=i-cur; const h=Math.floor(products.length/2);
+  if(d>h) d-=products.length; if(d<-h) d+=products.length;
+  return Math.max(-2,Math.min(2,d));
+}
+function update(){
+  const p=products[cur];
+  document.querySelectorAll('.slide').forEach((s,i)=>{
+    s.dataset.p=offset(i);
+    s.setAttribute('aria-current',i===cur?'true':'false');
+  });
+  document.querySelectorAll('.rail-btn').forEach((b,i)=>b.classList.toggle('active',i===cur));
+
+  document.getElementById('prodName').textContent=p.name;
+  document.getElementById('prodPrice').textContent=p.price;
+  document.getElementById('prodDesc').textContent=p.desc;
+
+  document.getElementById('specList').innerHTML=[
+    ['Batterie',p.battery],['Puce',p.chip],['Stockage',p.storage],['Garantie',p.warranty]
+  ].map(([l,v])=>`<div class="spec-row"><span>${l}</span><strong>${v}</strong></div>`).join('');
+
+  const sc=p.stock==='En stock'?'var(--success)':'var(--warn)';
+  const sc2=p.stock==='En stock'?'rgba(61,255,160,0.15)':'rgba(255,180,67,0.15)';
+  document.getElementById('dispoList').innerHTML=[
+    ['Stock',`<span style="display:flex;align-items:center"><span class="status-dot" style="background:${sc};box-shadow:0 0 0 4px ${sc2}"></span>${p.stock}</span>`],
+    ['Réservation',p.reservation],['Retrait',p.pickup]
+  ].map(([l,v])=>`<div class="spec-row"><span>${l}</span><strong>${v}</strong></div>`).join('');
+
+  document.getElementById('pillList').innerHTML=p.pills.map(t=>`<span class="pill">${t}</span>`).join('');
+
+  const mc=document.getElementById('mainCopy');
+  mc.style.animation='none'; void mc.offsetWidth;
+  mc.style.animation='fadeUp 380ms cubic-bezier(0.22,1,0.36,1) both';
+}
+
+/* ──────────────────────────────────────────
+   EVENTS
+────────────────────────────────────────── */
+function move(d){cur=(cur+d+products.length)%products.length;update();}
+document.getElementById('prev').addEventListener('click',()=>move(-1));
+document.getElementById('next').addEventListener('click',()=>move(1));
+
+const dlg=document.getElementById('dlg');
+document.getElementById('compareBtn').addEventListener('click',()=>dlg.showModal?.()??dlg.setAttribute('open',''));
+document.getElementById('dlgClose').addEventListener('click',()=>dlg.close());
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);});
+let tx=0;
+stage.addEventListener('touchstart',e=>tx=e.changedTouches[0].clientX,{passive:true});
+stage.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)move(d>0?-1:1);},{passive:true});
+
+update();
+</script>
 </body>
 </html>
